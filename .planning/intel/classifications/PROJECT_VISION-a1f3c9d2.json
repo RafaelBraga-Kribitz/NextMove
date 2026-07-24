@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\PROJECT_VISION.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "PROJECT_VISION.md",
+  "summary": "Foundation vision document for NextMove, a behavioral decision engine for e-commerce personalization, covering rationale, market context, and portfolio positioning.",
+  "scope": ["NextMove", "behavioral decision engine", "e-commerce personalization", "recommendation engines", "marketing automation", "CDPs", "decision intelligence", "machine learning", "portfolio positioning"],
+  "cross_refs": ["OPEN_DECISIONS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

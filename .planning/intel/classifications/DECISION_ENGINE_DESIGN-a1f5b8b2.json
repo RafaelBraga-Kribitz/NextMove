@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\DECISION_ENGINE_DESIGN.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "DECISION_ENGINE_DESIGN.md",
+  "summary": "Technical specification of the decision engine's optimization formula, inputs, constraints, and the typed Decision output contract.",
+  "scope": ["decision engine", "uplift scoring", "action catalog", "customer context", "business context", "environmental context", "Decision object schema", "hard constraints", "soft constraints"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

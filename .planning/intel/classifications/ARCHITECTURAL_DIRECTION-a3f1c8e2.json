@@ -1,0 +1,26 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\ARCHITECTURAL_DIRECTION.md",
+  "type": "ADR",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "ARCHITECTURAL_DIRECTION.md",
+  "summary": "Component-by-component architecture for a nine-part behavioral decision engine covering ingestion through explanation and evaluation.",
+  "scope": [
+    "Event Ingestion & Telemetry",
+    "Feature Layer",
+    "Behavior Analysis (Segmentation)",
+    "ML Models (Prediction)",
+    "Decision Engine",
+    "Business Rules",
+    "Optimization Layer",
+    "Explanation Engine",
+    "Evaluation & 3WD Experimentation Gateway",
+    "Headless API & Demo Surface",
+    "Simulator",
+    "MLOps"
+  ],
+  "cross_refs": ["DECISION_ENGINE_DESIGN.md", "QUALITY_BAR.md"],
+  "locked": true,
+  "precedence": null,
+  "notes": "MANIFEST_TYPE=ADR was authoritative; heuristic/content classification skipped per process. Document reads as a multi-component architectural spec/blueprint rather than a single-decision ADR: no frontmatter status field, no top-level Context/Decision/Consequences structure, but contains multiple embedded '[Decision: ...]' and '[Alternative: ... rejected]' annotations throughout (e.g. sections 2.1, 2.2, 2.6, 2.8, 2.10) consistent with locked architectural decisions. Treated as locked (Accepted) per ADR convention since manifest declared type and no Proposed/Draft marker was present."
+}

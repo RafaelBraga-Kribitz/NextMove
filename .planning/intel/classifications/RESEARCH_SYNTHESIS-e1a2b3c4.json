@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\RESEARCH_SYNTHESIS.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "RESEARCH_SYNTHESIS.md",
+  "summary": "Synthesizes 18 research sources into distilled principles, consensus findings, and contradictions/trade-offs for an adaptive e-commerce personalization system.",
+  "scope": ["adaptive UI personalization", "e-commerce", "MCDA clustering", "bandit/nudge optimization", "three-way decision model", "explainability", "cold start", "generative content", "evaluation metrics"],
+  "cross_refs": ["QUALITY_BAR.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

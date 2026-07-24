@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\DESIGN_PRINCIPLES.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "DESIGN_PRINCIPLES.md",
+  "summary": "Eight design principles for NextMove covering domain focus, headless architecture, events, explainability, human oversight, offline experimentation, reproducibility, and production realism.",
+  "scope": ["e-commerce behavioral decisioning", "headless architecture", "event-driven design", "explainability", "human-in-the-loop", "offline experimentation", "reproducibility", "production realism"],
+  "cross_refs": ["QUALITY_BAR.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

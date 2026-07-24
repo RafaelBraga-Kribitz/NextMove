@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\QUALITY_BAR.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "QUALITY_BAR.md",
+  "summary": "Defines testable acceptance criteria, definition of done, prohibited anti-patterns, technical debt policy, documentation standards, and explanation evaluation rubric.",
+  "scope": ["decision engine", "models & segmentation", "experimentation", "policy evaluation", "engineering", "technical debt policy", "documentation standards", "3WD gateway", "MCDA scorecard", "human evaluation rubric"],
+  "cross_refs": ["DEBT.md", "README.md", "docs/adr/NNN-*.md", "EXPERIMENTS.md", "SIMULATOR_ASSUMPTIONS.md", "DECISION_ENGINE_DESIGN"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

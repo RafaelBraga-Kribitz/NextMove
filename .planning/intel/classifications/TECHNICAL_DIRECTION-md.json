@@ -1,0 +1,29 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\TECHNICAL_DIRECTION.md",
+  "type": "ADR",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "TECHNICAL_DIRECTION.md",
+  "summary": "Architectural, data, ML, decision-engine, config, and API philosophy for NextMove's behavioral decision engine, with embedded locked decisions.",
+  "scope": [
+    "modular monolith architecture",
+    "data contracts",
+    "point-in-time correctness",
+    "synthetic data simulator",
+    "classical ML ladder",
+    "gradient boosting",
+    "decision engine",
+    "3WD gateway",
+    "configuration as data",
+    "REST API",
+    "Decision contract"
+  ],
+  "cross_refs": [
+    "OPEN_DECISIONS (OD-1)",
+    "OPEN_DECISIONS (OD-4)",
+    "SIMULATOR_ASSUMPTIONS.md"
+  ],
+  "locked": false,
+  "precedence": null,
+  "notes": "MANIFEST_TYPE=ADR applied as authoritative, overriding content-based classification. Document is a broad multi-section technical direction/philosophy doc rather than a single Context/Decision/Consequences ADR; individual decisions are inline-tagged (e.g. '[Decision — justified in OPEN_DECISIONS OD-1]') but no document-level Status field (Accepted/Proposed) is present, so locked is set false per rule that only explicit 'Accepted' status confers lock."
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\PRODUCT_CHARTER.md",
+  "type": "PRD",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "PRODUCT_CHARTER.md",
+  "summary": "Product charter for NextMove, a behavioral decision engine for e-commerce personalization, defining objectives, personas, and scope.",
+  "scope": ["decision engine", "e-commerce personalization", "customer segmentation", "recommendation", "experimentation gateway", "reproducibility"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

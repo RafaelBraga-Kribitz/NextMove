@@ -1,0 +1,13 @@
+{
+  "source_path": "c:\\Users\\Benutzer1\\Documents\\_DOING\\PROJECTS\\PORTFOLIO_PROJECTS\\PROJECTS_STARTED_NOT_FINISHED\\NextMove\\OPEN_DECISIONS.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "OPEN_DECISIONS.md",
+  "summary": "Ten open architecture/technical decisions with options, trade-offs, and recommendations to be ratified as ADRs before planning.",
+  "scope": ["modular monolith vs services", "decide-on-request vs batch", "simulator isolation", "synthetic vs public dataset validation", "explainability", "uplift approximation", "artifact versioning", "3WD thresholds", "automation autonomy tiers", "action space design", "alternative architectures comparison"],
+  "cross_refs": ["ARCHITECTURAL_DIRECTION.md", "RESEARCH_SYNTHESIS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}
