@@ -1,12 +1,19 @@
 ---
-gsd_state_version: '1.0'  # placeholder; syncStateFrontmatter overwrites on first state.* call
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 1
+current_phase_name: Reproducible World
 status: planning
+stopped_at: Phase 1 context gathered
+last_updated: "2026-07-25T15:49:16.309Z"
+last_activity: 2026-07-24
+last_activity_desc: PROJECT.md, REQUIREMENTS.md and ROADMAP.md created from
 progress:
-  total_phases: 5
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
@@ -33,6 +40,7 @@ Progress: [░░░░░░░░░░] 0%
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: —
 - Total execution time: 0.0 hours
@@ -44,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: —
 - Trend: —
 
@@ -59,14 +68,19 @@ Decisions most likely to bite during Phase 1:
 - Locked AD-12 / proposed TD-10: the simulator is the primary data source; it must be
   import-isolated from `models/`, `decisions/`, `policies/` and `features/`, enforced by
   import-linter in CI (OD-3). If simulator internals reach the models, every result is fake.
+
 - Locked AD-18: data/artifact versioning is **explicitly open** (OD-7 — DVC vs. content-hashed
   store). Ratify by ADR in Phase 1; do not assume DVC because OPEN_DECISIONS recommends it.
+
 - Locked AD-16 / proposed TD-09: time-aware splits only. Random splits on behavioral data are
   banned and leakage tests are mandatory from the first feature table.
+
 - Proposed TD-17: hardcoded business logic is a rejected change. Simulator parameters, feature
   lists, constraints, weights and thresholds all live in schema-validated YAML.
+
 - Planning decision: the 3WD gateway lands in Phase 3, before the learned layer, because promotion
   requires beating the incumbent on decision-level metrics.
+
 - Planning decision (user, 2026-07-24): timing/channel are fixed archetype **parameters** in v1
   (DEC-04) and optimized **dimensions** only in v2 (POL-02).
 
@@ -80,8 +94,10 @@ None yet.
   as ADR-001..010 before phase planning. Synthesis found no substantive contradiction with the
   locked ADRs — the gap is procedural — so DOC-01 makes ratification an early Phase 1 deliverable
   rather than a blocker. OD-7 stays genuinely open until its ADR is written.
+
 - **Phase 2 size:** Phase 2 carries 19 of 64 requirements. It is the product's core vertical slice
   and should not be split into horizontal layers, but it will need the most plans of any phase.
+
 - **AC-7 widened:** `QUALITY_BAR.md` AC-7 names two segmentation viability criteria; the locked ADR
   mandates four. SEG-02 uses all four. Do not narrow it back when writing the Phase 4 tests.
 
@@ -95,8 +111,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24
-Stopped at: Roadmap and requirements written; 64/64 v1 requirements mapped across 5 phases.
-Resume file: None
+Last session: 2026-07-25T15:49:16.292Z
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-reproducible-world/01-CONTEXT.md
 
 Next: `/gsd-plan-phase 1`
