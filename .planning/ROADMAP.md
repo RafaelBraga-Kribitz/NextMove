@@ -47,7 +47,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A feature row read `as_of` a past timestamp contains no information created after that timestamp, proven by leakage tests in the suite; no evaluation split anywhere in the repo is random over behavioral time.
   4. CI fails the build if any module in `models/`, `decisions/`, `policies/` or `features/` imports the simulator package.
   5. A reviewer can open `SIMULATOR_ASSUMPTIONS.md` and `docs/adr/001`–`010` and find every generative assumption and every ratified open decision written down — including an explicit ADR resolving OD-7 (DVC vs. content-hashed artifact store) — and can change the seasonality curve, the feature list, or a simulator parameter by editing schema-validated YAML rather than code.
-**Plans**: TBD
+**Plans**: 11 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Toolchain, ten-package skeleton, test harness (ENG-01, ENG-08)
+- [ ] 01-02-PLAN.md — ADRs 001–010 ratifying OD-1..OD-10; docs/ relocation (DOC-01)
+- [ ] 01-03-PLAN.md — Layered config, Pydantic validation, stable config hash, seeds (ENG-03, ENG-04)
+- [ ] 01-04-PLAN.md — Import-linter boundary contracts and Linux-only CI (SIM-02, ENG-01)
+- [ ] 01-05-PLAN.md — Canonical event schema and inward-only adapter seam (DATA-01)
+- [ ] 01-06-PLAN.md — Storage repository layer, content-hash lineage, DVC (DATA-04, ENG-01, ENG-04, ENG-09)
+- [ ] 01-07-PLAN.md — Simulator world: per-entity RNG, clock, latent traits, seasonal catalog (SIM-01)
+- [ ] 01-08-PLAN.md — Daily tick, response functions, micro-events, UC1/UC2 occurrence (SIM-01, SIM-04)
+- [ ] 01-09-PLAN.md — Ingest validation, quarantine, semantic gates, DQ summary (DATA-02, DATA-03)
+- [ ] 01-10-PLAN.md — Point-in-time feature layer, leakage proofs, time-aware splits (FEAT-01, FEAT-02)
+- [ ] 01-11-PLAN.md — DVC pipeline, `just reproduce`, determinism proof, SIMULATOR_ASSUMPTIONS.md (ENG-04, ENG-08, ENG-09, SIM-03)
 
 ### Phase 2: The Decision Spine
 **Goal**: Anyone can ask the running service what to do next for a given customer and receive a constraint-legal, self-explaining, reproducible `Decision` — including the decision to do nothing — produced end to end through the whole pipeline on a rule baseline.
@@ -105,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Reproducible World | 0/TBD | Not started | - |
+| 1. Reproducible World | 0/11 | Planned | - |
 | 2. The Decision Spine | 0/TBD | Not started | - |
 | 3. The Evaluation Gateway | 0/TBD | Not started | - |
 | 4. The Learned Layer | 0/TBD | Not started | - |
