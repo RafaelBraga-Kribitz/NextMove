@@ -186,3 +186,11 @@ deviations, since the plan explicitly left them open.
 ---
 *Phase: 01-reproducible-world*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All created files verified present on disk (`src/nextmove/ingest/contracts.py`,
+`src/nextmove/ingest/adapters.py`, `src/nextmove/ingest/__init__.py`,
+`tests/unit/test_event_contract.py`, `tests/unit/test_adapter_registry.py`, this SUMMARY).
+All task commits (`e2af9d9`, `b2a05b8`, `f50f9e4`, `c7909ef`) and the SUMMARY commit
+(`c7b1942`) verified present in `git log --oneline --all`.
