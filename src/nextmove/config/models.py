@@ -229,6 +229,32 @@ class LoopholeConfig(StrictModel):
     fatigue_penalty_enabled: bool = True
 
 
+class EngagementConfig(StrictModel):
+    """Daily organic session-occurrence and browse-depth parameters the daily tick's stage-3
+    organic generation reads (plan 01-08, D-07 stage 3).
+
+    Distinct from `ResponseConfig.base_conversion_rate`, which is the *response* function's
+    base conversion probability once a session already exists -- this group governs whether,
+    and how deeply, a customer browses on a given day at all. Added because no existing
+    config group covers it and no such number may be a bare literal in `src/nextmove/`
+    (ENG-03).
+    """
+
+    base_session_probability: float = Field(ge=0.0, le=1.0)
+    min_views_per_session: int = Field(gt=0)
+    max_views_per_session: int = Field(gt=0)
+    add_to_cart_given_view_rate: float = Field(ge=0.0, le=1.0)
+
+    @model_validator(mode="after")
+    def _check_view_range(self) -> "EngagementConfig":
+        if self.min_views_per_session > self.max_views_per_session:
+            raise ValueError(
+                "min_views_per_session must be <= max_views_per_session "
+                f"(got {self.min_views_per_session} > {self.max_views_per_session})"
+            )
+        return self
+
+
 class SimulatorConfig(StrictModel):
     """Every world parameter the daily-tick simulator reads (D-07)."""
 
@@ -243,6 +269,7 @@ class SimulatorConfig(StrictModel):
     micro_events: MicroEventConfig
     response: ResponseConfig
     loophole: LoopholeConfig
+    engagement: EngagementConfig
     seeds: SeedsConfig
     # The cadence, in ticks, at which run.py materializes a ground_truth_uplift snapshot row
     # per (customer, action_type). A schema-validated config value rather than a module

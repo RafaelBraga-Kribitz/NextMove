@@ -85,6 +85,11 @@ simulator:
       email_delayed: 1.05
   loophole:
     fatigue_penalty_enabled: true
+  engagement:
+    base_session_probability: 0.1
+    min_views_per_session: 1
+    max_views_per_session: 5
+    add_to_cart_given_view_rate: 0.2
   seeds:
     world: 1
     organic: 2
