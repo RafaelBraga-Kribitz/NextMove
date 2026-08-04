@@ -1,0 +1,13 @@
+# Add patterns of files dvc should ignore, which could improve
+# the performance. Learn more at
+# https://dvc.org/doc/user-guide/dvcignore
+
+# Transient staging root (paths.py: resolve_staging_path / staging_root). Part files and
+# DuckDB spill files live here for the duration of a single run and are removed by
+# clear_staging() before the run exits -- never a tracked artifact.
+data/_staging/
+
+.venv/
+__pycache__/
+tests/
+
