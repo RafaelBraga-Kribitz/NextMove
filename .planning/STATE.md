@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-08-04T16:49:54.552Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-08-04T18:12:35.197Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 6 of 11
+Plan: 7 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [█████░░░░░] 45%
+Progress: [██████░░░░] 55%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [█████░░░░░] 45%
 | Phase 01 P03 | 30min | 3 tasks | 16 files |
 | Phase 01 P04 | 25min | 3 tasks | 8 files |
 | Phase 01 P05 | 20min | 3 tasks | 5 files |
+| Phase 01 P06 | n/a (interrupted-and-resumed session) | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P05] Payload shapes for session_start/session_end/cart_remove/cart_abandon were unspecified in REQUIREMENTS/RESEARCH; designed minimal fields (device, duration_s, sku+quantity, cart_value_cents) matching the plan's strictness conventions
 - [Phase ?]: [Phase 1 P05] Event.ts uses plain datetime + explicit field_validator (not pydantic AwareDatetime) so naive-datetime rejection names the field explicitly per plan instruction
 - [Phase ?]: [Phase 1 P05] EVENT_ID_NAMESPACE is a fixed, arbitrary hardcoded uuid.UUID constant (not a well-known namespace), documented as never-to-be-regenerated
+- [Phase ?]: [Phase 1 P06] write_table/write_part_file derive Arrow schema from the row model class, always nullable=True (matches DuckDB's read_parquet->Arrow output so write_table and write_table_from_parts stay byte-identical); empty-row writes require an explicit row_model= kwarg since Python cannot recover element type from an empty list
+- [Phase ?]: [Phase 1 P06] query()/write_query_to_part() table_bindings are name -> Path (caller-resolved Parquet paths), not table-name strings requiring zone resolution
+- [Phase ?]: [Phase 1 P06] dvc init run without --no-scm-checks (flag does not exist in dvc 3.67); plain dvc init used since repo already has git
 
 ### Pending Todos
 
@@ -130,6 +134,7 @@ None yet.
   failed review in all three cycles, each time in a new disguise.
 
 - [Phase 1 P04] SIM-02 transitive re-export edge (a re-export chain carrying a simulator symbol into a forbidden source package without a direct import) has no dedicated fixture-based proof; raise before phase verification closes SIM-02
+- [Phase 1 P06] ENG-08 peak-RSS proof (test_merge_peak_rss_stays_under_budget in tests/golden/test_deterministic_write.py) has never run to completion on this Windows dev machine -- it self-skips (POSIX-only resource module). Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for this plan.
 
 ## Deferred Items
 
@@ -141,8 +146,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T16:49:54.544Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-08-04T18:12:35.188Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`

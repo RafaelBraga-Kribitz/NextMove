@@ -48,7 +48,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       session, referential integrity to the catalog — run as pipeline gates that fail the run, not
       as optional scripts.
 
-- [ ] **DATA-04**: Every derived table records the content hashes of its inputs and the hash of the
+- [x] **DATA-04**: Every derived table records the content hashes of its inputs and the hash of the
       config that generated it, and the full lineage chain is printable.
 
 ### Feature Layer (FEAT)
@@ -278,7 +278,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       Makefile/justfile as the operational interface, no orchestration platform, no cloud
       dependency, no streaming infrastructure.
 
-- [ ] **ENG-09**: Data and model artifacts are versioned by a ratified mechanism. **OD-7 is open**
+- [x] **ENG-09**: Data and model artifacts are versioned by a ratified mechanism. **OD-7 is open**
       (DVC vs. content-hashed artifact store + MLflow artifacts) and must be decided by ADR, not
       assumed.
 
@@ -384,14 +384,14 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Pending |
 | DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Complete |
 | FEAT-01 | Phase 1 | Pending |
 | FEAT-02 | Phase 1 | Pending |
 | ENG-01 | Phase 1 | Complete |
 | ENG-03 | Phase 1 | Complete |
 | ENG-04 | Phase 1 | Complete |
 | ENG-08 | Phase 1 | Complete |
-| ENG-09 | Phase 1 | Pending |
+| ENG-09 | Phase 1 | Complete |
 | DOC-01 | Phase 1 | Complete |
 | MODEL-01 | Phase 2 | Pending |
 | DEC-01 | Phase 2 | Pending |
