@@ -17,7 +17,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
 
 ### Simulator (SIM)
 
-- [ ] **SIM-01**: The simulator generates a mid-market e-commerce world — customers with latent
+- [x] **SIM-01**: The simulator generates a mid-market e-commerce world — customers with latent
       price sensitivity, loyalty and fatigue; a seasonal catalog; inventory dynamics; campaigns —
       that *responds* to delivered actions via explicit action-response functions, enabling
       counterfactual policy evaluation.
@@ -377,7 +377,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SIM-01 | Phase 1 | Pending |
+| SIM-01 | Phase 1 | Complete |
 | SIM-02 | Phase 1 | Complete |
 | SIM-03 | Phase 1 | Pending |
 | SIM-04 | Phase 1 | Pending |

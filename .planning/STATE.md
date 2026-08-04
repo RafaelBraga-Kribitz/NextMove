@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-08-04T18:12:35.197Z"
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-08-04T18:37:20.886Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 7 of 11
+Plan: 8 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [██████░░░░] 55%
+Progress: [██████░░░░] 64%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [██████░░░░] 55%
 | Phase 01 P04 | 25min | 3 tasks | 8 files |
 | Phase 01 P05 | 20min | 3 tasks | 5 files |
 | Phase 01 P06 | n/a (interrupted-and-resumed session) | 3 tasks | 9 files |
+| Phase 01 P07 | 14min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P06] write_table/write_part_file derive Arrow schema from the row model class, always nullable=True (matches DuckDB's read_parquet->Arrow output so write_table and write_table_from_parts stay byte-identical); empty-row writes require an explicit row_model= kwarg since Python cannot recover element type from an empty list
 - [Phase ?]: [Phase 1 P06] query()/write_query_to_part() table_bindings are name -> Path (caller-resolved Parquet paths), not table-name strings requiring zone resolution
 - [Phase ?]: [Phase 1 P06] dvc init run without --no-scm-checks (flag does not exist in dvc 3.67); plain dvc init used since repo already has git
+- [Phase ?]: [Phase 1 P07] Truncated normal/lognormal latent-trait draws to a documented 6-sigma window (np.clip) so 'impossible outside configured support' is provably true for every distribution family, not vacuous for the unbounded ones
+- [Phase ?]: [Phase 1 P07] category_affinity uses softmax normalization, not literal sum-to-1, because the configured mean-zero normal family can produce a negative or near-zero raw sum across only two categories
+- [Phase ?]: [Phase 1 P07] Added SeasonalityConfig.low_class_amplitude_factor and CampaignConfig.discount_bps_min/max to the config schema (Rule 2) -- both required by world-building logic and missing from plan 01-03's schema
 
 ### Pending Todos
 
@@ -146,8 +150,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:12:35.188Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-08-04T18:37:20.873Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`
