@@ -4,15 +4,15 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 1
 current_phase_name: Reproducible World
-status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-07-25T16:51:39.140Z"
-last_activity: 2026-07-24
-last_activity_desc: PROJECT.md, REQUIREMENTS.md and ROADMAP.md created from
+status: planned
+stopped_at: Phase 1 plans converged through 3 cross-AI review cycles
+last_updated: "2026-08-04T00:00:00.000Z"
+last_activity: 2026-08-04
+last_activity_desc: Phase 1 plans converged via /gsd-plan-review-convergence
 progress:
   total_phases: 1
   completed_phases: 0
-  total_plans: 0
+  total_plans: 11
   completed_plans: 0
 ---
 
@@ -30,10 +30,13 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 1 of 5 (Reproducible World)
-Plan: 0 of TBD in current phase
+Plan: 0 of 11 in current phase
 Status: Ready to execute
-Last activity: 2026-07-24 — PROJECT.md, REQUIREMENTS.md and ROADMAP.md created from
-`/gsd-ingest-docs` synthesis of 10 pre-existing planning documents. Greenfield; no source code yet.
+Last activity: 2026-08-04 — Phase 1 plans converged through 3 cycles of
+`/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
+2026-08-17). 9 HIGH and 12 non-HIGH findings resolved across cycles 1–3; 4 HIGH and 6 non-HIGH
+from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
+pass after it. Greenfield; no source code yet.
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -101,6 +104,14 @@ None yet.
 - **AC-7 widened:** `QUALITY_BAR.md` AC-7 names two segmentation viability criteria; the locked ADR
   mandates four. SEG-02 uses all four. Do not narrow it back when writing the Phase 4 tests.
 
+- **Final Phase 1 replan is unreviewed:** the cycle-3 amendment (commit `f4c788b`) closed 4 HIGH and
+  6 non-HIGH findings but was verified by `gsd-plan-checker` only — external reviewer capacity was
+  exhausted (Codex quota resets 2026-08-17; Gemini daily quota spent). Re-running
+  `/gsd-plan-review-convergence 1` once quota returns would give those fixes an independent pass.
+  Highest-risk surface: `01-06` storage API (`write_parquet_stream`, `write_table_from_parts`,
+  `write_query_to_part`) and the three memory-budget suites in `01-08`/`01-09`/`01-10`. ENG-08
+  failed review in all three cycles, each time in a new disguise.
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -111,8 +122,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T15:49:16.292Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-reproducible-world/01-CONTEXT.md
+Last session: 2026-08-04
+Stopped at: Phase 1 plans converged (11 plans, 7 waves)
+Resume file: .planning/phases/01-reproducible-world/01-REVIEWS.md
 
-Next: `/gsd-plan-phase 1`
+Next: `/gsd-execute-phase 1`
