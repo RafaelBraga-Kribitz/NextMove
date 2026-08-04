@@ -9,10 +9,11 @@ setup:
 fmt:
     uv run ruff format .
 
-# Lint + format-check (CI-equivalent gate)
+# Lint + format-check + import-boundary contracts (CI-equivalent gate)
 lint:
     uv run ruff check .
     uv run ruff format --check .
+    uv run lint-imports
 
 # Run the test suite
 test:

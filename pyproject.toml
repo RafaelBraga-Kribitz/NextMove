@@ -52,3 +52,43 @@ markers = [
 [tool.coverage.run]
 source = ["src/nextmove"]
 branch = true
+
+[tool.importlinter]
+root_packages = ["nextmove"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "simulator internals must never reach the learned/decision layers"
+type = "forbidden"
+source_modules = [
+    "nextmove.models",
+    "nextmove.decisions",
+    "nextmove.policies",
+    "nextmove.features",
+]
+forbidden_modules = ["nextmove.simulator"]
+
+# Storage sits behind a thin repository layer (ENG-01): every package except
+# nextmove.storage is forbidden from importing pyarrow or duckdb directly. A
+# consumer package that must name an Arrow type in an annotation imports the
+# public `Table` alias re-exported from `nextmove.storage` (plan 01-06) instead
+# of importing pyarrow itself — that is the sanctioned route, and no exemption
+# or TYPE_CHECKING allowance is configured on this contract.
+[[tool.importlinter.contracts]]
+name = "only nextmove.storage may touch the parquet/duckdb i/o surface"
+type = "forbidden"
+source_modules = [
+    "nextmove.simulator",
+    "nextmove.ingest",
+    "nextmove.features",
+    "nextmove.segmentation",
+    "nextmove.models",
+    "nextmove.rules",
+    "nextmove.decisions",
+    "nextmove.policies",
+    "nextmove.explain",
+    "nextmove.evaluate",
+    "nextmove.api",
+    "nextmove.config",
+]
+forbidden_modules = ["pyarrow", "duckdb"]
