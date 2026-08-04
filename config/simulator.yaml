@@ -69,6 +69,16 @@ simulator:
     loyalty_weight: 0.25
     fatigue_penalty_weight: 0.15
     category_affinity_weight: 0.20
+    # Per-archetype base coefficient response_multiplier reads for each non-none action
+    # (plan 01-08). none is excluded -- it always returns the identity multiplier 1.0.
+    archetype_base_multiplier:
+      wait: 1.02
+      recommend: 1.10
+      bundle: 1.15
+      discount_low: 1.20
+      discount_high: 1.35
+      email_now: 1.08
+      email_delayed: 1.05
 
   # D-04: deliberate, documented reward-hacking loophole. Disabling this removes the
   # fatigue penalty from the response function entirely -- the exploit the v2
@@ -82,3 +92,8 @@ simulator:
     organic: 424243
     response: 424244
     campaign: 424245
+
+  # MEDIUM-3: how densely run.py's ground_truth_uplift snapshot table samples the
+  # (customer, action_type) cross product, in ticks. Monthly by default -- see plan 01-08's
+  # frontmatter flagged assumption for the roughly 7.2M-row sizing rationale at default scale.
+  uplift_snapshot_every_ticks: 30

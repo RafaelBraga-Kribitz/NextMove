@@ -177,14 +177,44 @@ class MicroEventConfig(StrictModel):
         return self
 
 
+# The seven non-`none` DEC-03 action archetypes `response.archetype_base_multiplier` must
+# cover, duplicated here as plain strings rather than imported from
+# `nextmove.simulator.response.ActionType` because `nextmove.simulator` already imports
+# `nextmove.config.models` (traits.py, world.py) -- importing back would close a cycle.
+# `ActionType` is the canonical source; this set is a plain-string mirror kept in sync with
+# it by hand.
+_RESPONSE_ARCHETYPES: frozenset[str] = frozenset(
+    {"wait", "recommend", "bundle", "discount_low", "discount_high", "email_now", "email_delayed"}
+)
+
+
 class ResponseConfig(StrictModel):
-    """Coefficients of the documented action-response functions (D-03)."""
+    """Coefficients of the documented action-response functions (D-03).
+
+    `archetype_base_multiplier` gives `response_multiplier` (plan 01-08) a per-archetype base
+    coefficient read from config rather than a code literal (ENG-03): `none` always returns
+    the identity multiplier `1.0` by construction and is deliberately excluded from this map.
+    """
 
     base_conversion_rate: float = Field(ge=0.0, le=1.0)
     price_sensitivity_weight: float
     loyalty_weight: float
     fatigue_penalty_weight: float
     category_affinity_weight: float
+    archetype_base_multiplier: dict[str, float]
+
+    @model_validator(mode="after")
+    def _check_archetype_coverage(self) -> "ResponseConfig":
+        keys = set(self.archetype_base_multiplier)
+        missing = _RESPONSE_ARCHETYPES - keys
+        extra = keys - _RESPONSE_ARCHETYPES
+        if missing or extra:
+            raise ValueError(
+                "archetype_base_multiplier must declare exactly one base coefficient for "
+                f"each non-none action archetype {sorted(_RESPONSE_ARCHETYPES)!r}; missing "
+                f"{sorted(missing)!r}, unexpected {sorted(extra)!r}"
+            )
+        return self
 
 
 class LoopholeConfig(StrictModel):
@@ -214,6 +244,12 @@ class SimulatorConfig(StrictModel):
     response: ResponseConfig
     loophole: LoopholeConfig
     seeds: SeedsConfig
+    # The cadence, in ticks, at which run.py materializes a ground_truth_uplift snapshot row
+    # per (customer, action_type). A schema-validated config value rather than a module
+    # constant: changing it legitimately changes the shipped table's bytes, and ENG-04's
+    # lineage row can only account for a change that sits inside the hashed config surface
+    # (review MEDIUM-3).
+    uplift_snapshot_every_ticks: int = Field(gt=0, default=30)
 
 
 # ---------------------------------------------------------------------------------------

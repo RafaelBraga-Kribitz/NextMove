@@ -3,3 +3,6 @@
 simulator:
   n_customers: 100
   horizon_days: 30
+  # Snapshot every tick at this tiny scale so ground_truth_uplift row counts stay meaningful
+  # in fast tests without paying the default profile's monthly-cadence sizing tradeoff.
+  uplift_snapshot_every_ticks: 1

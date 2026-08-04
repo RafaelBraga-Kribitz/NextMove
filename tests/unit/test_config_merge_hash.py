@@ -75,6 +75,14 @@ simulator:
     loyalty_weight: 0.2
     fatigue_penalty_weight: 0.1
     category_affinity_weight: 0.2
+    archetype_base_multiplier:
+      wait: 1.0
+      recommend: 1.1
+      bundle: 1.1
+      discount_low: 1.2
+      discount_high: 1.3
+      email_now: 1.05
+      email_delayed: 1.05
   loophole:
     fatigue_penalty_enabled: true
   seeds:
