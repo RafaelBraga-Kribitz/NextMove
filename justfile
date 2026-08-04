@@ -36,6 +36,13 @@ ci:
 simulate profile="default":
     uv run python -m nextmove.simulator --profile {{ trim_start_match(profile, "profile=") }}
 
+# Run the ingest pipeline for one profile: contract validation with quarantine, the DATA-03
+# semantic gates, the D-21 reject-rate threshold, and the D-22 one-line summary (DATA-02,
+# DATA-03). Reads the `events_raw`/`catalog` tables plan 01-08's `just simulate` wrote, so
+# run that first. `just ingest profile="tiny"` for the fast unit-test profile.
+ingest profile="default":
+    uv run python -m nextmove.ingest --profile {{ trim_start_match(profile, "profile=") }}
+
 # On-demand memory/wall-clock budget check (ENG-08) -- gated behind an env var so neither the
 # default suite nor CI runs it. Currently runs only the simulator's budget suite; plan 01-11
 # widens this recipe's *body* once the ingest and features budget suites exist in later waves,
