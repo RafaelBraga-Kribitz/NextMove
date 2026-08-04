@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-08-04T16:08:34.573Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-08-04T16:24:33.696Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 3 of 11
+Plan: 4 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [██░░░░░░░░] 18%
+Progress: [███░░░░░░░] 27%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██░░░░░░░░] 18%
 |------|----------|-------|-------|
 | Phase 01 P01 | 30min | 3 tasks | 22 files |
 | Phase 01 P02 | 45min | 3 tasks | 22 files |
+| Phase 01 P03 | 30min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: Package legitimacy checkpoint approved: dvc corrected to github.com/iterative/dvc (seam returned wrong treeverse/lakeFS org); remaining nine core packages confirmed canonical
 - [Phase ?]: ruff extend-exclude added for .planning/, docs/, *.md — ruff format by default reformats fenced Python code blocks in Markdown, which broke just lint against planning docs
 - [Phase ?]: All ten root planning documents relocated to docs/ via git mv (D-17); OD-1..OD-10 ratified as docs/adr/001-010 (DOC-01), closing the OD-7 open marker in locked AD-18 with DVC + MLflow
+- [Phase ?]: [Phase 1 P03] Added config/data_quality.yaml as an eighth per-domain base file (D-21's reject-rate threshold has no home among D-23's seven named domains)
+- [Phase ?]: [Phase 1 P03] Added config/profiles/tiny.yaml as a fourth profile (~100 customers/~30d horizon) for unit tests, per RESEARCH.md Wave 0 Gaps
+- [Phase ?]: [Phase 1 P03] Profile name is part of the hashed config surface — two different profiles never hash identically even with otherwise-identical content, matching D-24's intent
 
 ### Pending Todos
 
@@ -127,8 +131,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T16:08:34.565Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-08-04T16:24:33.686Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`

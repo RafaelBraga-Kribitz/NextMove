@@ -256,12 +256,12 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       new `Constraint` plus a new `ActionProvider` requires zero core-module edits, demonstrated by
       an example plugin in-repo.
 
-- [ ] **ENG-03**: All business numbers live in schema-validated, git-reviewed YAML — action catalog,
+- [x] **ENG-03**: All business numbers live in schema-validated, git-reviewed YAML — action catalog,
       constraints, utility weights, MCDA criteria and weights, 3WD thresholds (MDE, indifference
       margin, delay budget), segmentation constraints, feature lists, simulator parameters. Feature
       flags gate optional modules. Hardcoded business logic is a rejected change.
 
-- [ ] **ENG-04**: Any pipeline stage rerun with the same seed and config hash produces byte-identical
+- [x] **ENG-04**: Any pipeline stage rerun with the same seed and config hash produces byte-identical
       outputs; seeds are explicit everywhere including exploration, and each run records its resolved
       config hash.
 
@@ -388,8 +388,8 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | FEAT-01 | Phase 1 | Pending |
 | FEAT-02 | Phase 1 | Pending |
 | ENG-01 | Phase 1 | Complete |
-| ENG-03 | Phase 1 | Pending |
-| ENG-04 | Phase 1 | Pending |
+| ENG-03 | Phase 1 | Complete |
+| ENG-04 | Phase 1 | Complete |
 | ENG-08 | Phase 1 | Complete |
 | ENG-09 | Phase 1 | Pending |
 | DOC-01 | Phase 1 | Complete |
