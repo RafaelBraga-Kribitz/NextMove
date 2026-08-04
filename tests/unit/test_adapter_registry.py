@@ -80,9 +80,7 @@ def test_simulator_adapter_missing_required_field_raises() -> None:
 
 def test_simulator_adapter_output_is_canonically_sorted() -> None:
     adapter = SimulatorAdapter()
-    later = _canonical_record(
-        event_id="e2", ts=datetime(2024, 1, 1, 13, 0, 0, tzinfo=UTC)
-    )
+    later = _canonical_record(event_id="e2", ts=datetime(2024, 1, 1, 13, 0, 0, tzinfo=UTC))
     earlier = _canonical_record(event_id="e1", ts=BASE_TS)
     events = adapter.to_canonical([later, earlier])
     assert [e.event_id for e in events] == ["e1", "e2"]

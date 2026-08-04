@@ -49,9 +49,7 @@ def get_adapter(name: str) -> "type[IngestAdapter]":
     """
     if name not in _ADAPTER_REGISTRY:
         registered = sorted(_ADAPTER_REGISTRY)
-        raise KeyError(
-            f"no adapter registered under {name!r}; registered adapters: {registered}"
-        )
+        raise KeyError(f"no adapter registered under {name!r}; registered adapters: {registered}")
     return _ADAPTER_REGISTRY[name]
 
 
