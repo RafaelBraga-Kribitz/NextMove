@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Sync dependencies (frozen lockfile)
+        run: uv sync --frozen
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Import boundary contracts (lint-imports)
+        run: uv run lint-imports
+
+      - name: Test suite
+        run: uv run pytest -q
+
+      # -----------------------------------------------------------------
+      # Ownership notes for future readers of this workflow.
+      #
+      # Plan 01-11 appends two further steps to this job: a miniature
+      # end-to-end run on the `ci` profile, and a golden-file comparison
+      # step. Append after the steps above; do not rewrite this file.
+      #
+      # Static type checking (mypy) is deliberately absent from this
+      # workflow in Phase 1. This is a recorded decision, not an
+      # oversight: the typed plugin registries a type checker would
+      # protect (ENG-02) do not exist until Phase 2, and D-16 forbids a
+      # non-blocking CI step, so introducing mypy before ENG-02 lands
+      # would be a hard gate failing for reasons unrelated to this
+      # phase's goals. Phase 2 / ENG-02 owns adding a `mypy` step here.
+      # -----------------------------------------------------------------
