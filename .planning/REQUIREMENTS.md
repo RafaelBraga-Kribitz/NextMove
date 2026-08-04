@@ -22,7 +22,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       that *responds* to delivered actions via explicit action-response functions, enabling
       counterfactual policy evaluation.
 
-- [ ] **SIM-02**: The simulator is an import-isolated package: no module under `models/`,
+- [x] **SIM-02**: The simulator is an import-isolated package: no module under `models/`,
       `decisions/`, `policies/`, or `features/` may import it, enforced by an import-linter contract
       that fails CI. Simulator response functions are never visible to models — models see only
       events.
@@ -378,7 +378,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SIM-01 | Phase 1 | Pending |
-| SIM-02 | Phase 1 | Pending |
+| SIM-02 | Phase 1 | Complete |
 | SIM-03 | Phase 1 | Pending |
 | SIM-04 | Phase 1 | Pending |
 | DATA-01 | Phase 1 | Pending |

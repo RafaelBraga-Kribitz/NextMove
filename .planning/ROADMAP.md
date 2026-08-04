@@ -51,7 +51,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. CI fails the build if any module in `models/`, `decisions/`, `policies/` or `features/` imports the simulator package.
   5. A reviewer can open `SIMULATOR_ASSUMPTIONS.md` and `docs/adr/001`–`010` and find every generative assumption and every ratified open decision written down — including an explicit ADR resolving OD-7 (DVC vs. content-hashed artifact store) — and can change the seasonality curve, the feature list, or a simulator parameter by editing schema-validated YAML rather than code.
 
-**Plans**: 3/11 plans executed
+**Plans**: 4/11 plans executed
 
 Plans:
 **Wave 1**
@@ -62,7 +62,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 01-03-PLAN.md — Layered config, Pydantic validation, stable config hash, seeds (ENG-03, ENG-04)
-- [ ] 01-04-PLAN.md — Import-linter boundary contracts and Linux-only CI (SIM-02, ENG-01)
+- [x] 01-04-PLAN.md — Import-linter boundary contracts and Linux-only CI (SIM-02, ENG-01)
 - [ ] 01-05-PLAN.md — Canonical event schema and inward-only adapter seam (DATA-01)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Reproducible World | 3/11 | In Progress|  |
+| 1. Reproducible World | 4/11 | In Progress|  |
 | 2. The Decision Spine | 0/TBD | Not started | - |
 | 3. The Evaluation Gateway | 0/TBD | Not started | - |
 | 4. The Learned Layer | 0/TBD | Not started | - |

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-08-04T16:24:33.696Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-08-04T16:35:15.164Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 4 of 11
+Plan: 5 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [███░░░░░░░] 27%
+Progress: [████░░░░░░] 36%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [███░░░░░░░] 27%
 | Phase 01 P01 | 30min | 3 tasks | 22 files |
 | Phase 01 P02 | 45min | 3 tasks | 22 files |
 | Phase 01 P03 | 30min | 3 tasks | 16 files |
+| Phase 01 P04 | 25min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P03] Added config/data_quality.yaml as an eighth per-domain base file (D-21's reject-rate threshold has no home among D-23's seven named domains)
 - [Phase ?]: [Phase 1 P03] Added config/profiles/tiny.yaml as a fourth profile (~100 customers/~30d horizon) for unit tests, per RESEARCH.md Wave 0 Gaps
 - [Phase ?]: [Phase 1 P03] Profile name is part of the hashed config surface — two different profiles never hash identically even with otherwise-identical content, matching D-24's intent
+- [Phase ?]: [Phase 1 P04] Static type checking (mypy) deferred to Phase 2/ENG-02, recorded as a comment inside .github/workflows/ci.yml itself (review LOW-2)
+- [Phase ?]: [Phase 1 P04] No carve-out on either import-linter contract; consumers needing an Arrow type annotation use nextmove.storage's public Table alias instead of importing pyarrow directly (review cycle 2 MEDIUM-6)
+- [Phase ?]: [Phase 1 P04] SIM-02 transitive re-export edge remains open and unproven by a dedicated fixture; flagged for phase verification before SIM-02 is considered fully closed
 
 ### Pending Todos
 
@@ -121,6 +125,8 @@ None yet.
   `write_query_to_part`) and the three memory-budget suites in `01-08`/`01-09`/`01-10`. ENG-08
   failed review in all three cycles, each time in a new disguise.
 
+- [Phase 1 P04] SIM-02 transitive re-export edge (a re-export chain carrying a simulator symbol into a forbidden source package without a direct import) has no dedicated fixture-based proof; raise before phase verification closes SIM-02
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -131,8 +137,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T16:24:33.686Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-08-04T16:35:15.155Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`
