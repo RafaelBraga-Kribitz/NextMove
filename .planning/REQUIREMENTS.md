@@ -284,7 +284,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
 
 ### Documentation & Portfolio (DOC)
 
-- [ ] **DOC-01**: OD-1 through OD-10 are ratified as `docs/adr/001-*.md` … `010-*.md`, including the
+- [x] **DOC-01**: OD-1 through OD-10 are ratified as `docs/adr/001-*.md` … `010-*.md`, including the
       explicit ratification of OD-7; thereafter every resolved open decision and every accepted debt
       exception gets its own ADR, and any change to a ratified decision requires a superseding ADR.
 
@@ -392,7 +392,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | ENG-04 | Phase 1 | Pending |
 | ENG-08 | Phase 1 | Complete |
 | ENG-09 | Phase 1 | Pending |
-| DOC-01 | Phase 1 | Pending |
+| DOC-01 | Phase 1 | Complete |
 | MODEL-01 | Phase 2 | Pending |
 | DEC-01 | Phase 2 | Pending |
 | DEC-02 | Phase 2 | Pending |
