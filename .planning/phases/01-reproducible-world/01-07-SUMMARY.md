@@ -305,3 +305,8 @@ None - no external service configuration required.
 ---
 *Phase: 01-reproducible-world*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All 6 created files verified present on disk; all 5 commit hashes (`f23e4e5`, `286cc57`,
+`50d91e2`, `e752eb5`, plus this SUMMARY's own `c354cbf`) verified present in `git log --all`.
