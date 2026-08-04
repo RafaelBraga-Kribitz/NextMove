@@ -133,11 +133,23 @@ def _arrow_type_for_annotation(annotation: object) -> tuple[pa.DataType, bool]:
 
 def _schema_from_model(model_cls: type[BaseModel]) -> pa.Schema:
     """Build a Pydantic model's Arrow schema explicitly from its field annotations --
-    deterministic and independent of any actual row's values."""
+    deterministic and independent of any actual row's values.
+
+    Every field is declared nullable, regardless of the model's own optionality: DuckDB's
+    `read_parquet` -> Arrow conversion always reports nullable=True on its output columns
+    (an engine-level default, not a data-driven inference), and `write_table_from_parts`
+    merges through that engine. A field declared non-nullable here would make an
+    in-memory `write_table` and an out-of-core `write_table_from_parts` of the identical
+    rows diverge in their Arrow schema -- and therefore in their Parquet bytes -- even
+    though every value matches. Byte-equality between the two write paths is a pinned
+    acceptance criterion, so nullability is never used as a data-integrity signal in this
+    schema; `pydantic`'s own field validation is what actually enforces non-nullability
+    before a row ever reaches this function.
+    """
     fields = []
     for name, field_info in model_cls.model_fields.items():
-        arrow_type, nullable = _arrow_type_for_annotation(field_info.annotation)
-        fields.append(pa.field(name, arrow_type, nullable=nullable))
+        arrow_type, _nullable = _arrow_type_for_annotation(field_info.annotation)
+        fields.append(pa.field(name, arrow_type, nullable=True))
     return pa.schema(fields)
 
 
@@ -331,7 +343,9 @@ def write_table_from_parts(
     `read_parquet_file` and concatenated them into one Arrow table before sorting -- that
     design bounded the producer's *Python* heap while leaving the merge's Arrow footprint
     equal to the whole table, which is the entire hazard ENG-08 names and which no
-    `tracemalloc`-based test can observe. Do not reach for `pyarrow.concat_tables` here.
+    `tracemalloc`-based test can observe. Do not reach for a whole-table Arrow
+    concatenation helper here -- that is the exact regression this module's tests guard
+    against.
 
     Raises `ValueError` naming the table when `part_paths` is empty: a zero-part merge has
     no schema source to write from. A producer that must write its table even when no rows
@@ -515,6 +529,6 @@ def query(sql: str, root: Path | None = None, **table_bindings: Path) -> Table:
             con.execute(
                 f'CREATE VIEW "{name}" AS SELECT * FROM read_parquet({_sql_quote(str(Path(path)))})'
             )
-        return con.execute(sql).fetch_arrow_table()
+        return con.execute(sql).to_arrow_table()
     finally:
         con.close()
