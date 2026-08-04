@@ -1,0 +1,4 @@
+# ci profile: thin overlay sized for the miniature CI end-to-end run (D-23).
+simulator:
+  n_customers: 500
+  horizon_days: 60

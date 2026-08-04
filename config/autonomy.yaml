@@ -1,0 +1,18 @@
+# D-12 / OD-9: three-tier autonomy, as reviewable config rather than code. Membership is
+# pairwise disjoint -- enforced by AutonomyConfig's model validator.
+autonomy:
+  # Tier 1: auto-applies on a 3WD Accept verdict.
+  tier_1_auto:
+    - variant_assignment
+    - ranking_weight_nudge
+
+  # Tier 2: requires human sign-off.
+  tier_2_human_signoff:
+    - policy_promotion
+    - model_promotion
+    - segment_redefinition
+
+  # Tier 3: human-only, never automatic.
+  tier_3_human_only:
+    - price_change
+    - discount_ceiling_change

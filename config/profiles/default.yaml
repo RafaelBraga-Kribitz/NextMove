@@ -1,0 +1,2 @@
+# default profile: overrides nothing but the profile name (set by the loader itself).
+# Inherits every base domain value as-is.

@@ -1,0 +1,42 @@
+# Feature grid definition (D-19, FEAT-01). Every family below is one Phase 2+ feature
+# transform; the daily grid materializes one snapshot per active customer per day.
+features:
+  grid_frequency: daily
+  lookback_days: 90
+  features:
+    - name: rfm_recency
+      kind: numeric
+      params: {unit: days}
+    - name: rfm_frequency
+      kind: numeric
+      params: {window_days: 90}
+    - name: rfm_monetary
+      kind: numeric
+      params: {window_days: 90}
+    - name: session_visits
+      kind: numeric
+      params: {window_days: 30}
+    - name: session_depth
+      kind: numeric
+      params: {window_days: 30}
+    - name: session_dwell
+      kind: numeric
+      params: {window_days: 30}
+    - name: category_affinity
+      kind: numeric
+      params: {window_days: 90}
+    - name: price_sensitivity_proxy
+      kind: numeric
+      params: {window_days: 90}
+    - name: message_fatigue_count
+      kind: numeric
+      params: {window_days: 14}
+    - name: cart_state
+      kind: categorical
+      params: {}
+    - name: abandonment_history
+      kind: numeric
+      params: {window_days: 90}
+    - name: micro_conversion_aggregates
+      kind: numeric
+      params: {window_days: 30}

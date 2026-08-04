@@ -1,0 +1,79 @@
+# Simulator world parameters (D-01, D-02, D-03, D-04, D-07). Every distribution parameter
+# here must be reproduced verbatim in docs/SIMULATOR_ASSUMPTIONS.md (plan 01-11, SIM-03).
+simulator:
+  start_date: "2024-01-01"
+  horizon_days: 548  # 18 months -> two winter peaks (D-02)
+  n_customers: 50000  # default scale (D-02); overridden per profile
+
+  # Fashion-core retailer plus exactly one low-seasonality contrast category (D-01).
+  categories:
+    - name: fashion_apparel
+      seasonality_class: high
+      sku_count: 1200
+      base_price_cents_min: 1500
+      base_price_cents_max: 24000
+      margin_rate: 0.45
+    - name: home_basics
+      seasonality_class: low
+      sku_count: 400
+      base_price_cents_min: 800
+      base_price_cents_max: 9000
+      margin_rate: 0.35
+
+  # Four D-03 latent traits every simulated customer carries.
+  latent_traits:
+    price_sensitivity:
+      family: beta
+      params: {alpha: 2.0, beta: 5.0}
+    loyalty:
+      family: beta
+      params: {alpha: 2.5, beta: 4.0}
+    fatigue:
+      family: lognormal
+      params: {mu: -1.2, sigma: 0.6}
+    category_affinity:
+      family: normal
+      params: {mu: 0.0, sigma: 1.0}
+
+  # Twelve monthly multipliers; December is the fashion-category winter peak.
+  seasonality:
+    monthly_multipliers:
+      [0.85, 0.80, 0.85, 0.90, 0.95, 1.00, 0.95, 0.95, 1.05, 1.15, 1.45, 1.90]
+    peak_month: 12
+
+  inventory:
+    initial_stock_per_sku: 250
+    low_stock_threshold: 20
+    restock_probability_per_day: 0.08
+
+  campaigns:
+    channels: [email, push]
+    frequency_cap_per_week: 3
+    send_probability_per_eligible_day: 0.15
+
+  # Scroll / filter / dwell-class micro-events (SIM-04).
+  micro_events:
+    scroll_rate: 0.55
+    filter_rate: 0.22
+    dwell_short_seconds_max: 8.0
+    dwell_medium_seconds_max: 45.0
+
+  response:
+    base_conversion_rate: 0.035
+    price_sensitivity_weight: 0.30
+    loyalty_weight: 0.25
+    fatigue_penalty_weight: 0.15
+    category_affinity_weight: 0.20
+
+  # D-04: deliberate, documented reward-hacking loophole. Disabling this removes the
+  # fatigue penalty from the response function entirely -- the exploit the v2
+  # reward-hacking probe targets. Phase 1 ships the loophole; it does not exploit it.
+  loophole:
+    fatigue_penalty_enabled: true
+
+  # D-25: seeds are config values inside the hashed surface, never CLI flags.
+  seeds:
+    world: 424242
+    organic: 424243
+    response: 424244
+    campaign: 424245

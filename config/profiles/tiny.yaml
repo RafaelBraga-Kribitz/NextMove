@@ -1,0 +1,5 @@
+# tiny profile (flagged planner extension to D-23's three-profile list): ~100 customers,
+# ~30 day horizon, for unit-level tests that must not pay the ci profile's cost.
+simulator:
+  n_customers: 100
+  horizon_days: 30

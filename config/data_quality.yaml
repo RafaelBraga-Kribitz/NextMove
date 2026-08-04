@@ -1,0 +1,11 @@
+# Data quality gates (D-20, D-21, D-22). Flagged planner extension to D-23's seven-file
+# enumeration: D-21 requires the reject-rate threshold in YAML per ENG-03, and none of
+# D-23's seven named domains is an ingest/data-quality domain -- this file follows D-23's
+# own per-domain pattern rather than smuggling this number into an unrelated file.
+data_quality:
+  max_reject_rate: 0.001  # D-21 default: ~0.1%
+  fail_run_on_exceed: true
+  semantic_gates:
+    - non_negative_price
+    - monotonic_session_timestamps
+    - catalog_referential_integrity

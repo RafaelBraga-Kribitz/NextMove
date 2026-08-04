@@ -134,9 +134,9 @@ def config_tree(tmp_path):
 # A full valid Config-shaped dict, built directly in Python (not via YAML), for the
 # dict-level key-order test below.
 def _valid_config_dict() -> dict:
-    return yaml.safe_load(
-        SIMULATOR_YAML + FEATURES_YAML + DATA_QUALITY_YAML + AUTONOMY_YAML
-    ) | {"profile": "base"}
+    return yaml.safe_load(SIMULATOR_YAML + FEATURES_YAML + DATA_QUALITY_YAML + AUTONOMY_YAML) | {
+        "profile": "base"
+    }
 
 
 # ---------------------------------------------------------------------------------------
@@ -214,9 +214,7 @@ def test_key_order_in_yaml_does_not_change_hash(tmp_path) -> None:
     reversed_dir = tmp_path / "reversed"
     _write_domain_files(reversed_dir)
     forward_simulator = yaml.safe_load(SIMULATOR_YAML)
-    reversed_simulator = {
-        "simulator": dict(reversed(list(forward_simulator["simulator"].items())))
-    }
+    reversed_simulator = {"simulator": dict(reversed(list(forward_simulator["simulator"].items())))}
     (reversed_dir / "simulator.yaml").write_text(yaml.safe_dump(reversed_simulator))
 
     forward_resolved = load_config("base", config_dir=forward_dir)
