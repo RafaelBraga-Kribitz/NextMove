@@ -147,9 +147,7 @@ class Campaign(BaseModel):
     @model_validator(mode="after")
     def _check_tick_order(self) -> "Campaign":
         if self.start_tick >= self.end_tick:
-            raise ValueError(
-                f"start_tick ({self.start_tick}) must be < end_tick ({self.end_tick})"
-            )
+            raise ValueError(f"start_tick ({self.start_tick}) must be < end_tick ({self.end_tick})")
         return self
 
 
@@ -263,9 +261,7 @@ def _build_campaigns(config: SimulatorConfig) -> tuple[Campaign, ...]:
     ordinal = 0
     for category in config.categories:
         for channel in config.campaigns.channels:
-            rng = stream_rng(
-                SeedDomain.campaign, ordinal, _CAMPAIGN_TICK_SENTINEL, config.seeds
-            )
+            rng = stream_rng(SeedDomain.campaign, ordinal, _CAMPAIGN_TICK_SENTINEL, config.seeds)
             discount_bps = int(
                 rng.integers(
                     config.campaigns.discount_bps_min, config.campaigns.discount_bps_max + 1

@@ -71,9 +71,7 @@ def entity_rng(domain: SeedDomain, entity_id: int, seeds: SeedsConfig) -> Genera
     return np.random.default_rng([entity_id, seed, int(ordinal)])
 
 
-def stream_rng(
-    domain: SeedDomain, entity_id: int, tick: int, seeds: SeedsConfig
-) -> Generator:
+def stream_rng(domain: SeedDomain, entity_id: int, tick: int, seeds: SeedsConfig) -> Generator:
     """Return a `Generator` for one entity's draws at one simulated tick.
 
     Folds `tick` into the same entropy list `entity_rng` uses, so each tick gets its own
