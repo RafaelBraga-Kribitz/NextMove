@@ -229,3 +229,8 @@ recorded `just` as absent on this machine).
 ---
 *Phase: 01-reproducible-world*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All 13 created files verified present on disk; all 4 commits (`ea3e8fa`, `f19bc8c`, `77a7d7e`,
+`1ab3d09`) verified present in `git log --oneline --all`.
