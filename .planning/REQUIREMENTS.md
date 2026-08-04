@@ -36,7 +36,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
 
 ### Event Ingestion & Storage (DATA)
 
-- [ ] **DATA-01**: All events conform to one canonical schema
+- [x] **DATA-01**: All events conform to one canonical schema
       `event(event_id, customer_id, session_id, ts, type, payload, source)` with typed payloads per
       event type; ingestion adapters map external shapes inward to this schema, never the reverse.
 
@@ -381,7 +381,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | SIM-02 | Phase 1 | Complete |
 | SIM-03 | Phase 1 | Pending |
 | SIM-04 | Phase 1 | Pending |
-| DATA-01 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Pending |
 | DATA-03 | Phase 1 | Pending |
 | DATA-04 | Phase 1 | Pending |
