@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-08-PLAN.md
-last_updated: "2026-08-04T21:19:54.004Z"
+stopped_at: Completed 01-09-PLAN.md
+last_updated: "2026-08-04T22:50:21.729Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 9 of 11
+Plan: 10 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [███████░░░] 73%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [███████░░░] 73%
 | Phase 01 P06 | n/a (interrupted-and-resumed session) | 3 tasks | 9 files |
 | Phase 01 P07 | 14min | 3 tasks | 10 files |
 | Phase 01 P08 | ~5h | 3 tasks | 17 files |
+| Phase 01 P09 | ~4h | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P08] EventRow flattens Event.payload to JSON before any storage write -- the storage layer's generic schema deriver cannot handle a 13-member discriminated union
 - [Phase ?]: [Phase 1 P08] pyproject.toml's storage import-linter contract gained ignore_imports entries -- the transitive forbidden-import check previously blocked every consumer package from importing nextmove.storage at all
 - [Phase ?]: [Phase 1 P08] Rule 1 calibration: restock_probability_per_day 0.08->0.01, add_to_cart_given_view_rate 0.18->0.33, uniform sku selection -> power-law popularity weighting (exponent 3.0) -- proven empirically across six demo-profile runs that shipped values made D-05's UC1 scarcity scenario structurally unreachable
+- [Phase ?]: [Phase 1 P09] PipelineStage/RejectRecord physically defined in semantic.py not pipeline.py to break a circular import (pipeline needs run_semantic_gates from semantic; semantic's GateResult needs RejectRecord) -- pipeline.py re-exports both
+- [Phase ?]: [Phase 1 P09] Tasks executed in dependency order (2, then 1, then 3) rather than plan-numeric order, forced by the semantic.py/pipeline.py import direction
+- [Phase ?]: [Phase 1 P09] Scale-invariant growth budget assertions bound against each run's own observed batch-fill ratio (demo/tiny max_events_part_rows), not customer count -- tiny's total event count is smaller than one VALIDATION_BATCH_SIZE batch
 
 ### Pending Todos
 
@@ -146,6 +150,7 @@ None yet.
 - [Phase 1 P06] ENG-08 peak-RSS proof (test_merge_peak_rss_stays_under_budget in tests/golden/test_deterministic_write.py) has never run to completion on this Windows dev machine -- it self-skips (POSIX-only resource module). Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for this plan.
 - [Phase 1 P08] ENG-08 peak-RSS assertion (tests/integration/test_simulation_budget.py TestPeakResidentMemory / scale-invariant RSS-ratio) has never run to completion -- self-skips on this Windows dev machine (POSIX-only resource module), same open item as plan 01-06's peak-RSS test. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven.
 - [Phase 1 P08] just budget profile="default" (50k customers, 548-day horizon) has never been run to completion in this session -- demo-scale (2000 customers) took ~3-4 min uninstrumented, so default scale plausibly takes on the order of an hour. Should be run once before treating the phase's laptop-reproducibility claim as proven at default scale.
+- [Phase 1 P09] ENG-08 peak-RSS assertions in tests/integration/test_ingest_budget.py have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06 and 01-08. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the ingest path.
 
 ## Deferred Items
 
@@ -157,8 +162,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T21:19:53.994Z
-Stopped at: Completed 01-08-PLAN.md
+Last session: 2026-08-04T22:50:11.304Z
+Stopped at: Completed 01-09-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`

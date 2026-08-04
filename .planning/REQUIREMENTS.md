@@ -40,11 +40,11 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       `event(event_id, customer_id, session_id, ts, type, payload, source)` with typed payloads per
       event type; ingestion adapters map external shapes inward to this schema, never the reverse.
 
-- [ ] **DATA-02**: Events are validated against versioned Pydantic contracts and landed append-only
+- [x] **DATA-02**: Events are validated against versioned Pydantic contracts and landed append-only
       in DuckDB; contract violations are quarantined into a rejects table with a stated reason
       rather than silently dropped or coerced.
 
-- [ ] **DATA-03**: Semantic quality checks — no negative prices, monotonic timestamps within a
+- [x] **DATA-03**: Semantic quality checks — no negative prices, monotonic timestamps within a
       session, referential integrity to the catalog — run as pipeline gates that fail the run, not
       as optional scripts.
 
@@ -382,8 +382,8 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | SIM-03 | Phase 1 | Pending |
 | SIM-04 | Phase 1 | Complete |
 | DATA-01 | Phase 1 | Complete |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
 | FEAT-01 | Phase 1 | Pending |
 | FEAT-02 | Phase 1 | Pending |
