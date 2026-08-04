@@ -24,11 +24,25 @@ window mechanic is deferred until a requirement actually needs it.
 context to price scarcity and seasonality against) uses that customer's single highest-affinity
 category, tie-broken alphabetically (`_primary_category`). Phase 1 does not model within-session
 category switching.
+
+**Rule 1 bug fix: popularity-weighted sku selection.** Discovered while calibrating plan 01-08
+Task 3's UC1 test against a real `demo`-profile run: uniform sku selection within a category
+(the original design) spreads browse/cart/order demand evenly across a category's hundreds of
+skus, so no sku's stock ever approaches `inventory.low_stock_threshold` regardless of config --
+at `demo` scale, ~500 orders spread over 1600 skus against an initial stock of 250 each leaves
+every sku within a handful of units of full stock for the entire horizon. That makes D-05's UC1
+scenario ("winter-jacket cart abandoner with **low stock**...") structurally unreachable, which
+is this plan's own must-have truth. `_zipf_weights` biases selection toward a small number of
+"popular" skus per category (rank-1/(rank+1), normalized) so demand concentrates the way real
+retail catalogs' demand does, making genuine scarcity reachable without touching any shipped
+config value.
 """
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from functools import cache
 
+from numpy.random import Generator
 from pydantic import BaseModel, ConfigDict, Field
 
 from nextmove.config.models import MicroEventConfig, SimulatorConfig
@@ -102,6 +116,42 @@ def _primary_category(customer: Customer) -> str:
     """The customer's single highest-affinity category, tie-broken alphabetically."""
     affinities = customer.traits.category_affinity
     return max(sorted(affinities), key=lambda name: affinities[name])
+
+
+#: Power-law exponent for `_zipf_weights`. `1.0` (classic Zipf) concentrates too little at the
+#: category sizes this catalog ships (hundreds of skus): with total order volume far below
+#: total catalog capacity, even a `1.0`-exponent top sku's share of demand still lands nowhere
+#: near `inventory.low_stock_threshold`, which was proven empirically while calibrating this
+#: plan's UC1 test (top-sku stock never dropped below 244/250 at `demo` scale, and still only
+#: ~108/250 at `2.5` combined with a full restock-rate reduction). `3.0` -- combined with
+#: `inventory.restock_probability_per_day`'s Rule 1 reduction and the small-batch restock
+#: below -- is the exponent that reliably concentrates enough demand onto the single
+#: top-ranked sku per category to deplete it within the horizon. Steep, but retail demand
+#: curves this skewed are not unrealistic, and D-05's requirement is that scarcity genuinely
+#: *occurs*, not that its curve is gentle.
+_POPULARITY_EXPONENT = 3.0
+
+
+@cache
+def _zipf_weights(n: int) -> tuple[float, ...]:
+    """A `1/(rank+1)**_POPULARITY_EXPONENT` popularity weighting over `n` items sorted by
+    rank, normalized to sum to 1.0. See the module docstring's "Rule 1 bug fix" note: pure
+    function of `n`, cached across the whole process since every category's sku count is
+    fixed for the life of a `World`.
+    """
+    raw = [1.0 / (rank + 1) ** _POPULARITY_EXPONENT for rank in range(n)]
+    total = sum(raw)
+    return tuple(weight / total for weight in raw)
+
+
+def _pick_sku(category_skus: tuple[Sku, ...], rng: Generator) -> Sku:
+    """Popularity-weighted sku selection within a category -- see the module docstring's
+    "Rule 1 bug fix" note. `category_skus` is `Catalog.by_category`'s tuple, already sorted by
+    sku name, so "rank" is a stable, deterministic property of the catalog, not of draw order.
+    """
+    weights = _zipf_weights(len(category_skus))
+    index = int(rng.choice(len(category_skus), p=weights))
+    return category_skus[index]
 
 
 def _min_inventory_for_category(world: World, category: str, default: int) -> int:
@@ -216,10 +266,21 @@ def _compute_boosts(
 # ---------------------------------------------------------------------------------------
 
 
+#: Fraction of `initial_stock_per_sku` one triggered restock replenishes. Companion to the
+#: "Rule 1 bug fix" above and discovered in the same calibration pass: restocking a sku
+#: straight back to `initial_stock_per_sku` on every trigger makes depletion nearly
+#: impossible regardless of demand concentration, because a single 8%-probability trigger
+#: erases days of accumulated organic demand in one step. A small fractional batch lets
+#: sustained demand outpace replenishment -- which is what real restock cadences do -- while
+#: `inventory.restock_probability_per_day` still governs how often a batch arrives at all.
+_RESTOCK_BATCH_FRACTION = 0.01
+
+
 def _maybe_restock_inventory(
     world: World, tick: int, config: SimulatorConfig, inventory_movements: dict[str, int]
 ) -> None:
     initial = config.inventory.initial_stock_per_sku
+    batch_size = max(1, round(initial * _RESTOCK_BATCH_FRACTION))
     for index, sku in enumerate(world.catalog.skus):
         rng = stream_rng(SeedDomain.world, index, tick, config.seeds)
         if rng.random() >= config.inventory.restock_probability_per_day:
@@ -227,7 +288,7 @@ def _maybe_restock_inventory(
         current = world.inventory.units(sku.sku)
         if current >= initial:
             continue
-        replenished = initial - current
+        replenished = min(batch_size, initial - current)
         world.inventory.restock(sku.sku, replenished)
         inventory_movements[sku.sku] = inventory_movements.get(sku.sku, 0) + replenished
 
@@ -299,7 +360,7 @@ def _generate_organic_for_customer(
     for _ in range(n_views):
         if not category_skus:
             break
-        sku = category_skus[int(rng.integers(0, len(category_skus)))]
+        sku = _pick_sku(category_skus, rng)
         viewed_skus.append(sku)
         emit(
             EventType.PRODUCT_VIEW,

@@ -47,7 +47,15 @@ simulator:
   inventory:
     initial_stock_per_sku: 250
     low_stock_threshold: 20
-    restock_probability_per_day: 0.08
+    # Rule 1 bug fix (plan 01-08 Task 3): 0.08 combined with a full-stock-topup restock made
+    # D-05's UC1 scarcity scenario structurally unreachable regardless of demand
+    # concentration -- proven empirically while calibrating tests/integration/
+    # test_uc_scenarios_occur.py against a real `demo`-profile run (a sku receiving 40%+ of
+    # its category's total order volume still never dropped below ~100 of its 250-unit
+    # initial stock). Lowered so a genuinely popular sku can deplete below
+    # low_stock_threshold within the horizon, alongside tick.py's small-batch restock and
+    # popularity-weighted sku selection.
+    restock_probability_per_day: 0.01
 
   campaigns:
     channels: [email, push]
@@ -91,7 +99,14 @@ simulator:
     base_session_probability: 0.12
     min_views_per_session: 1
     max_views_per_session: 6
-    add_to_cart_given_view_rate: 0.18
+    # Rule 1 bug fix (plan 01-08 Task 3, alongside the inventory.restock_probability_per_day
+    # and _POPULARITY_EXPONENT changes): 0.18 combined with uniform sku selection left
+    # per-sku demand far too dilute for D-05's UC1 scarcity scenario to ever occur, even
+    # after concentrating browse traffic onto a small number of popular skus per category.
+    # 0.33 -- calibrated against a real `demo`-profile run -- lets a genuinely popular sku's
+    # stock reach zero within the December peak-season window, which the earlier value never
+    # did regardless of concentration.
+    add_to_cart_given_view_rate: 0.33
 
   # D-25: seeds are config values inside the hashed surface, never CLI flags.
   seeds:

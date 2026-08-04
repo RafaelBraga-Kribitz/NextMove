@@ -92,3 +92,18 @@ source_modules = [
     "nextmove.config",
 ]
 forbidden_modules = ["pyarrow", "duckdb"]
+# import-linter's "forbidden" contract type walks the *transitive* import graph, so without
+# this list every package above would also be forbidden from importing nextmove.storage
+# itself (storage's own repository.py/lineage.py/_parquet.py import pyarrow/duckdb directly,
+# which is exactly what the module docstrings above and in nextmove/storage/repository.py
+# say is the sanctioned route). These entries name only storage's own internal edges to the
+# two forbidden libraries, so the transitive chain is broken at storage's boundary for every
+# *other* source module while a direct `import pyarrow`/`import duckdb` from any of them is
+# still caught (plan 01-08 Task 3, Rule 3: run_simulation could not otherwise call
+# nextmove.storage.write_table/write_part_file at all).
+ignore_imports = [
+    "nextmove.storage.repository -> pyarrow",
+    "nextmove.storage.repository -> duckdb",
+    "nextmove.storage.lineage -> pyarrow",
+    "nextmove.storage._parquet -> pyarrow",
+]

@@ -26,6 +26,24 @@ ci:
     uv run lint-imports
     uv run pytest -q
 
+# Run the simulator for one profile, writing raw + ground-truth tables through the storage
+# layer (SIM-01, D-07). `just simulate profile="tiny"` for the fast unit-test profile.
+# `trim_start_match` accepts both `just simulate tiny` (plain positional) and the
+# `just simulate profile="tiny"` form this phase's plans document throughout -- `just` has no
+# built-in `name=value` CLI calling convention, so the latter arrives as the literal single
+# positional string `profile=tiny` and is unwrapped here rather than left to fail on an
+# unknown profile name.
+simulate profile="default":
+    uv run python -m nextmove.simulator --profile {{ trim_start_match(profile, "profile=") }}
+
+# On-demand memory/wall-clock budget check (ENG-08) -- gated behind an env var so neither the
+# default suite nor CI runs it. Currently runs only the simulator's budget suite; plan 01-11
+# widens this recipe's *body* once the ingest and features budget suites exist in later waves,
+# so one command covers the whole ENG-08 story rather than only the simulator's third of it.
+# This plan creates the recipe and owns its name; 01-11 extends the body and nothing else.
+budget profile="default":
+    NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE={{ trim_start_match(profile, "profile=") }} uv run pytest tests/integration/test_simulation_budget.py -m slow -q
+
 # Full deterministic pipeline: simulate -> ingest -> features -> ... -> report
 # NOT YET WIRED — plan 01-11 replaces this body with the real DVC pipeline invocation.
 reproduce:
