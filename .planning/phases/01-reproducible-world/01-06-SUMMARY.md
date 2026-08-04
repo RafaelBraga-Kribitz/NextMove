@@ -410,3 +410,12 @@ guarantee.
 ---
 *Phase: 01-reproducible-world*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All 9 created files confirmed present on disk (paths.py, _parquet.py, repository.py, lineage.py,
+both test suites, .dvcignore, .dvc/config, this SUMMARY). All 4 commit hashes (817ce35, 712454a,
+fd6cab5, 8741698) confirmed present in `git log --oneline --all`. Full suite re-verified: 164
+passed, 1 skipped (POSIX-only RSS test, self-skipping with a stated reason on this Windows
+machine). `just lint`-equivalent (ruff check, ruff format --check, lint-imports) all clean;
+import-linter contracts 2 kept / 0 broken.
