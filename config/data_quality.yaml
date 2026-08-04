@@ -9,3 +9,6 @@ data_quality:
     - non_negative_price
     - monotonic_session_timestamps
     - catalog_referential_integrity
+  # Plan 01-09: one day, matching D-07's daily tick -- a session in this world cannot span
+  # more than the tick that generated it.
+  session_max_span_seconds: 86400

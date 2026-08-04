@@ -307,6 +307,13 @@ class DataQualityConfig(StrictModel):
     max_reject_rate: float = Field(default=0.001, ge=0.0, le=1.0)
     fail_run_on_exceed: bool = True
     semantic_gates: list[str]
+    # Plan 01-09: the monotonic-session-timestamps gate's cross-batch carry evicts an entry
+    # once its last-seen timestamp is more than this many seconds behind the current batch's
+    # watermark. Config, not a code constant, because it changes a gate's verdict (a longer
+    # span means fewer evictions and therefore fewer violations) and ENG-04 requires anything
+    # that can change output to sit inside the hashed config surface. Default matches D-07's
+    # daily tick: a session in this world cannot legitimately span more than one day.
+    session_max_span_seconds: int = Field(default=86400, gt=0)
 
 
 # ---------------------------------------------------------------------------------------
