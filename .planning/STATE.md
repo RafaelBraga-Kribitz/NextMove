@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-07-PLAN.md
-last_updated: "2026-08-04T18:37:20.886Z"
+stopped_at: Completed 01-08-PLAN.md
+last_updated: "2026-08-04T21:19:54.004Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 8 of 11
+Plan: 9 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [██████░░░░] 64%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [██████░░░░] 64%
 | Phase 01 P05 | 20min | 3 tasks | 5 files |
 | Phase 01 P06 | n/a (interrupted-and-resumed session) | 3 tasks | 9 files |
 | Phase 01 P07 | 14min | 3 tasks | 10 files |
+| Phase 01 P08 | ~5h | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,10 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P07] Truncated normal/lognormal latent-trait draws to a documented 6-sigma window (np.clip) so 'impossible outside configured support' is provably true for every distribution family, not vacuous for the unbounded ones
 - [Phase ?]: [Phase 1 P07] category_affinity uses softmax normalization, not literal sum-to-1, because the configured mean-zero normal family can produce a negative or near-zero raw sum across only two categories
 - [Phase ?]: [Phase 1 P07] Added SeasonalityConfig.low_class_amplitude_factor and CampaignConfig.discount_bps_min/max to the config schema (Rule 2) -- both required by world-building logic and missing from plan 01-03's schema
+- [Phase ?]: [Phase 1 P08] Added ResponseConfig.archetype_base_multiplier and SimulatorConfig.engagement -- plan 01-03's shipped schema had no per-archetype response coefficient or session-occurrence probability field
+- [Phase ?]: [Phase 1 P08] EventRow flattens Event.payload to JSON before any storage write -- the storage layer's generic schema deriver cannot handle a 13-member discriminated union
+- [Phase ?]: [Phase 1 P08] pyproject.toml's storage import-linter contract gained ignore_imports entries -- the transitive forbidden-import check previously blocked every consumer package from importing nextmove.storage at all
+- [Phase ?]: [Phase 1 P08] Rule 1 calibration: restock_probability_per_day 0.08->0.01, add_to_cart_given_view_rate 0.18->0.33, uniform sku selection -> power-law popularity weighting (exponent 3.0) -- proven empirically across six demo-profile runs that shipped values made D-05's UC1 scarcity scenario structurally unreachable
 
 ### Pending Todos
 
@@ -139,6 +144,8 @@ None yet.
 
 - [Phase 1 P04] SIM-02 transitive re-export edge (a re-export chain carrying a simulator symbol into a forbidden source package without a direct import) has no dedicated fixture-based proof; raise before phase verification closes SIM-02
 - [Phase 1 P06] ENG-08 peak-RSS proof (test_merge_peak_rss_stays_under_budget in tests/golden/test_deterministic_write.py) has never run to completion on this Windows dev machine -- it self-skips (POSIX-only resource module). Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for this plan.
+- [Phase 1 P08] ENG-08 peak-RSS assertion (tests/integration/test_simulation_budget.py TestPeakResidentMemory / scale-invariant RSS-ratio) has never run to completion -- self-skips on this Windows dev machine (POSIX-only resource module), same open item as plan 01-06's peak-RSS test. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven.
+- [Phase 1 P08] just budget profile="default" (50k customers, 548-day horizon) has never been run to completion in this session -- demo-scale (2000 customers) took ~3-4 min uninstrumented, so default scale plausibly takes on the order of an hour. Should be run once before treating the phase's laptop-reproducibility claim as proven at default scale.
 
 ## Deferred Items
 
@@ -150,8 +157,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:37:20.873Z
-Stopped at: Completed 01-07-PLAN.md
+Last session: 2026-08-04T21:19:53.994Z
+Stopped at: Completed 01-08-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`

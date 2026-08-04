@@ -30,7 +30,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
 - [ ] **SIM-03**: Every generative assumption is documented in `SIMULATOR_ASSUMPTIONS.md`, and every
       result derived from simulated data is labeled "in simulation" wherever it is reported.
 
-- [ ] **SIM-04**: The simulator emits micro-conversion (PCR) events — scroll, filter, dwell class —
+- [x] **SIM-04**: The simulator emits micro-conversion (PCR) events — scroll, filter, dwell class —
       alongside sessions, product views, add-to-cart, orders, campaign exposures, action deliveries
       and overrides, so micro-conversion weights can be derived empirically rather than guessed.
 
@@ -380,7 +380,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | SIM-01 | Phase 1 | Complete |
 | SIM-02 | Phase 1 | Complete |
 | SIM-03 | Phase 1 | Pending |
-| SIM-04 | Phase 1 | Pending |
+| SIM-04 | Phase 1 | Complete |
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Pending |
 | DATA-03 | Phase 1 | Pending |
