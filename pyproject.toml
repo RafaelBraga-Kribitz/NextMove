@@ -34,6 +34,9 @@ packages = ["src/nextmove"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# Ruff formats fenced Python code blocks inside Markdown by default; .planning/ and the
+# root planning docs are project documentation, not source under this repo's lint scope.
+extend-exclude = [".planning", "docs", "*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
