@@ -40,6 +40,9 @@ simulator:
     monthly_multipliers:
       [0.85, 0.80, 0.85, 0.90, 0.95, 1.00, 0.95, 0.95, 1.05, 1.15, 1.45, 1.90]
     peak_month: 12
+    # D-01: the low-seasonality contrast category's curve is the same shape damped toward
+    # 1.0 by this factor, so its peak-to-trough ratio is provably smaller (plan 01-07).
+    low_class_amplitude_factor: 0.15
 
   inventory:
     initial_stock_per_sku: 250
@@ -50,6 +53,8 @@ simulator:
     channels: [email, push]
     frequency_cap_per_week: 3
     send_probability_per_eligible_day: 0.15
+    discount_bps_min: 500
+    discount_bps_max: 3000
 
   # Scroll / filter / dwell-class micro-events (SIM-04).
   micro_events:

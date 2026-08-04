@@ -53,6 +53,7 @@ simulator:
   seasonality:
     monthly_multipliers: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 1.0, 1.3, 2.0]
     peak_month: 12
+    low_class_amplitude_factor: 0.15
   inventory:
     initial_stock_per_sku: 100
     low_stock_threshold: 10
@@ -61,6 +62,8 @@ simulator:
     channels: [email]
     frequency_cap_per_week: 2
     send_probability_per_eligible_day: 0.2
+    discount_bps_min: 500
+    discount_bps_max: 3000
   micro_events:
     scroll_rate: 0.5
     filter_rate: 0.2

@@ -5,4 +5,29 @@ Import-isolated (SIM-02): must never be imported by models/, decisions/, policie
 features/. Populated starting Phase 1.
 """
 
-__all__: list[str] = []
+from nextmove.simulator.clock import SimClock
+from nextmove.simulator.rng import SeedDomain, entity_rng, stream_rng
+from nextmove.simulator.traits import LatentTraits, sample_latent_traits
+from nextmove.simulator.world import (
+    Campaign,
+    Catalog,
+    Customer,
+    InventoryState,
+    Sku,
+    World,
+)
+
+__all__: list[str] = [
+    "Campaign",
+    "Catalog",
+    "Customer",
+    "InventoryState",
+    "LatentTraits",
+    "SeedDomain",
+    "SimClock",
+    "Sku",
+    "World",
+    "entity_rng",
+    "sample_latent_traits",
+    "stream_rng",
+]

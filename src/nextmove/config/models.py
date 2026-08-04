@@ -103,10 +103,18 @@ class CategoryConfig(StrictModel):
 
 
 class SeasonalityConfig(StrictModel):
-    """Twelve monthly multipliers plus the declared peak month."""
+    """Twelve monthly multipliers plus the declared peak month.
+
+    `low_class_amplitude_factor` is what makes the low-seasonality contrast category
+    genuinely flatter (D-01) rather than merely relabeled: a `low`-class category's monthly
+    multiplier is the same curve shape as `monthly_multipliers`, damped toward 1.0 by this
+    factor, so its peak-to-trough ratio is provably smaller than a `high`-class category's
+    (plan 01-07 `World.seasonal_multiplier_for_class`).
+    """
 
     monthly_multipliers: list[float]
     peak_month: int = Field(ge=1, le=12)
+    low_class_amplitude_factor: float = Field(gt=0.0, lt=1.0)
 
     @model_validator(mode="after")
     def _check_twelve_months(self) -> "SeasonalityConfig":
@@ -130,9 +138,24 @@ class InventoryConfig(StrictModel):
 
 
 class CampaignConfig(StrictModel):
+    """`discount_bps_min`/`discount_bps_max` bound the discount (in basis points, 1/100 of a
+    percent) a generated campaign offers — the same "min/max range in config, never a bare
+    literal in code" pattern `CategoryConfig` uses for price bands (ENG-03)."""
+
     channels: list[str]
     frequency_cap_per_week: int = Field(ge=0)
     send_probability_per_eligible_day: float = Field(ge=0.0, le=1.0)
+    discount_bps_min: int = Field(ge=0, le=10_000)
+    discount_bps_max: int = Field(ge=0, le=10_000)
+
+    @model_validator(mode="after")
+    def _check_discount_range(self) -> "CampaignConfig":
+        if self.discount_bps_min > self.discount_bps_max:
+            raise ValueError(
+                "discount_bps_min must be <= discount_bps_max "
+                f"(got {self.discount_bps_min} > {self.discount_bps_max})"
+            )
+        return self
 
 
 class MicroEventConfig(StrictModel):
