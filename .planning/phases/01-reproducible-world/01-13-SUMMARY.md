@@ -260,3 +260,8 @@ actual pre-existing budget values. No scope creep beyond the plan's own file lis
 ---
 *Phase: 01-reproducible-world*
 *Completed: 2026-08-05*
+
+## Self-Check: PASSED
+
+All 7 files listed under Files Created/Modified plus the SUMMARY itself exist on disk; all 4
+commit hashes (768a203, ac929d8, d17cdc0, 115d097) are present in `git log --oneline --all`.

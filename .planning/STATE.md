@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-12-PLAN.md (gap closure G-01-1)
-last_updated: "2026-08-05T17:06:48.521Z"
+stopped_at: Completed 01-13-PLAN.md (gap closure G-01-2)
+last_updated: "2026-08-05T17:23:53.369Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 2 of 13
+Plan: 3 of 13
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-05 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [█████████░] 92%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [█████████░] 92%
 | Phase 01 P10 | 165min | 3 tasks | 11 files |
 | Phase 01 P11 | ~2h | 3 tasks | 12 files |
 | Phase 01-reproducible-world P12 | 50min | 3 tasks | 3 files |
+| Phase 01 P13 | 55min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -139,6 +140,8 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P12] Tight-memory G-01-1 reproduction tuned to 20 parts x 20,000 rows (400k total) with a 400-byte payload against a monkeypatched STORAGE_MEMORY_LIMIT_MB=100 -- reliably reproduces the exact production OOM error signature in ~1.1s, well under the 120s test-section budget
 - [Phase ?]: [Phase 1 P12] write_table_from_parts' dedupe path now runs two DuckDB statements on two connections (materialize QUALIFY-deduped intermediate, close, then sort) instead of one QUALIFY+ORDER BY statement, per DuckDB's documented stacked-blocking-operator remediation; no-dedupe path unchanged
 - [Phase ?]: [Phase 1 P12] Dedupe intermediate lives at data/_staging/_merge_dedupe_<table_name>/ via resolve_staging_path, unlinked before write and removed in a finally via clear_staging so the merge cleans up after itself regardless of caller behavior
+- [Phase ?]: [Phase 1 P13] Widened all three budget files' demo wall-clock element to 1200.0 uniformly (not only the one that actually failed at 638.4s on CI) per Task 1's done-criteria, since ingest/features files' demo entries were already 900.0 not the plan's assumed 600.0 and neither asserts that element
+- [Phase ?]: [Phase 1 P13] Dropped an explicit -q from the CI peak-RSS step, budget-rss Justfile recipe, and the new unit test's collect-only subprocess call -- pyproject.toml addopts already supplies one -q, and pytest 9.1.1 suppresses its own pass/skip summary line and node-id listing once verbosity is lowered a second time
 
 ### Pending Todos
 
@@ -192,8 +195,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:06:48.511Z
-Stopped at: Completed 01-12-PLAN.md (gap closure G-01-1)
+Last session: 2026-08-05T17:23:53.357Z
+Stopped at: Completed 01-13-PLAN.md (gap closure G-01-2)
 Resume file: None
 
 Next: `/gsd-execute-phase 1`
