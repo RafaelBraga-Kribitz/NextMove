@@ -21,6 +21,11 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CI_YAML = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+#: Lowercase because that is the name git actually tracks. Spelling it `Justfile` resolves
+#: anyway on the case-insensitive Windows dev machine (`core.ignorecase=true`) and then raises
+#: FileNotFoundError on the Linux runner -- the same Windows-passes/Linux-fails asymmetry the
+#: path-separator normalization in `_collected_peak_rss_node_ids` below guards against.
+JUSTFILE = REPO_ROOT / "justfile"
 
 #: The six peak-process-RSS assertions across the three budget files that must carry the
 #: `peak_rss` marker -- the exact set named in plan 01-13's interface_context, written with
@@ -62,7 +67,7 @@ def _justfile_recipe_body(name: str) -> str:
     """The indented body lines of a Justfile recipe named `name` (no arguments), e.g.
     `budget-rss`. Matches the exact `"{name}:"` header line so `budget` does not also match
     `budget-rss`."""
-    lines = (REPO_ROOT / "Justfile").read_text().splitlines()
+    lines = JUSTFILE.read_text().splitlines()
     start = next(i for i, line in enumerate(lines) if line.strip() == f"{name}:")
     body_lines: list[str] = []
     for line in lines[start + 1 :]:
@@ -188,5 +193,5 @@ def test_local_and_ci_peak_rss_selections_agree():
         assert path in ci_run
         assert path in budget_rss_body
 
-    justfile_text = (REPO_ROOT / "Justfile").read_text()
+    justfile_text = JUSTFILE.read_text()
     assert "slow or peak_rss" in justfile_text
