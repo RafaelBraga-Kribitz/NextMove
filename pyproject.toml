@@ -47,6 +47,7 @@ addopts = "-q --strict-markers"
 markers = [
     "slow: marks tests as slow",
     "golden: marks golden-file determinism tests",
+    "peak_rss: marks assertions that read a peak process RSS measurement (resource.getrusage) and can therefore skip when the platform has no POSIX resource module; CI selects exactly this set and fails the job if any member of it skips (D-16 makes Linux CI the enforcing platform for ENG-08)",
 ]
 
 [tool.coverage.run]

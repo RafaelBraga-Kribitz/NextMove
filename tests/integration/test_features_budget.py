@@ -52,9 +52,14 @@ if TYPE_CHECKING:
 #: features stage -- distinct numbers from the simulator's/ingest's own tables because this
 #: stage's working set (one grid chunk's ASOF join and sort, plus one streamed row group) is a
 #: different shape again.
+# demo's wall-clock element was widened to 1200.0 for consistency with
+# test_simulation_budget.py's own demo entry, which ubuntu-latest CI run 31015357302 measured
+# at 638.4s against an original 600.0s budget -- no test in this file actually asserts this
+# element (both TestBoundedAccumulation and TestPeakResidentMemory unpack and discard it), so
+# this is belt-and-braces margin rather than a fix for an observed failure here.
 _PROFILE_BUDGETS: dict[str, tuple[float, float, float]] = {
     "tiny": (128.0, 512.0, 60.0),
-    "demo": (512.0, 2048.0, 900.0),
+    "demo": (512.0, 2048.0, 1200.0),
 }
 
 
@@ -194,6 +199,7 @@ class TestBoundedAccumulation:
 
 
 class TestPeakResidentMemory:
+    @pytest.mark.peak_rss
     def test_demo_subprocess_peak_rss_under_budget(
         self, demo_features_subprocess_rss: SubprocessRunResult
     ) -> None:
@@ -226,6 +232,7 @@ class TestScaleInvariantGrowth:
             f"{customer_ratio:.2f}x -- growth is no longer sub-linear"
         )
 
+    @pytest.mark.peak_rss
     def test_peak_rss_grows_less_than_customer_count_ratio(
         self,
         demo_features_result: _FeaturesRunResult,
