@@ -4,15 +4,15 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
-status: verifying
+status: executing
 stopped_at: Completed 01-11-PLAN.md (final plan of phase 01)
-last_updated: "2026-08-05T02:42:50.072Z"
-last_activity: 2026-08-04
+last_updated: "2026-08-05T16:48:12.682Z"
+last_activity: 2026-08-05
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
-  completed_phases: 1
-  total_plans: 11
+  completed_phases: 0
+  total_plans: 13
   completed_plans: 11
 ---
 
@@ -30,9 +30,9 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 11 of 11
-Status: Phase complete — ready for verification
-Last activity: 2026-08-04 — Phase 01 execution started
+Plan: 1 of 13
+Status: Executing Phase 01
+Last activity: 2026-08-05 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
 2026-08-17). 9 HIGH and 12 non-HIGH findings resolved across cycles 1–3; 4 HIGH and 6 non-HIGH
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
@@ -164,6 +164,19 @@ None yet.
 - [Phase 1 P10] ENG-08 peak-RSS assertions in tests/integration/test_features_budget.py (TestPeakResidentMemory / TestScaleInvariantGrowth's RSS half) have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06/01-08/01-09. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the features path.
 - [Phase 1 P11] The default-profile (50k customers, 548 days) full pipeline run has never been executed to completion in any session. dvc.yaml's committed default targets it. Should be run once before treating phase success criterion 1 as proven at default scale (same class of open item as plan 01-08's just budget profile=default note).
 - [Phase 1 P11] CI's new memory-budget gate (fails on any skipped peak-RSS assertion) has never run on Linux CI yet -- must be confirmed green on the first real CI run before ENG-08's memory bound is treated as measured rather than declared, across all of plans 01-06/01-08/01-09/01-10 and this plan.
+- [Phase 1 P12] The G-01-1 two-stage merge fix (write_table_from_parts now runs the dedupe
+  window and the sort as two separate DuckDB statements on two separate connections) landed
+  in plan 01-12 and is proven at ci scale (three ci-profile table digests byte-identical
+  pre/post-change) and against a tight synthetic memory budget (400k-row dedupe merge under a
+  monkeypatched 100MB limit). The default-profile run that originally failed
+  (.planning/debug/ingest-oom-default-scale.md) has NOT been re-executed, so UAT Test 1
+  remains open and must be re-run before phase success criterion 1 is treated as proven.
+  Commands for a human to run: `uv run python -m nextmove.simulator --profile default --out
+  data/repro_a`, then `uv run python -m nextmove.ingest --profile default --out data/repro_a`,
+  then `uv run python -m nextmove.features --profile default --out data/repro_a`, then the
+  same three commands with `--out data/repro_b`, then compare the sha256 of every table under
+  `raw/`, `canonical/`, `features/` and `ground_truth/` in both roots. Budget ~2.5 hours. Do
+  not mark G-01-1 resolved until this has been observed.
 
 ## Deferred Items
 
