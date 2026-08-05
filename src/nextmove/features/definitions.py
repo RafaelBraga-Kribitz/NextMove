@@ -187,7 +187,8 @@ def _rfm_monetary() -> FeatureTransform:
         empty_default=0,
         window_days=window_days,
         sql_expression=(
-            "COALESCE((SELECT SUM(json_extract_string(e.payload, '$.order_total_cents')::BIGINT) "
+            "COALESCE((SELECT "
+            "SUM(json_extract_string(e.payload, '$.order_total_cents')::BIGINT)::BIGINT "
             "FROM events e WHERE e.customer_id = grid_anchor.customer_id "
             "AND e.type = 'order_placed' AND e.ts <= grid_anchor.as_of_ts "
             f"AND e.ts > grid_anchor.as_of_ts - INTERVAL {window_days} DAY), 0)"
@@ -238,7 +239,13 @@ def _session_depth() -> FeatureTransform:
 @register_transform
 def _session_dwell() -> FeatureTransform:
     window_days = 30
-    empty_json = json.dumps({"short": 0, "medium": 0, "long": 0}, sort_keys=True)
+    # Key order and separators matter here: this string must be byte-identical to what the SQL
+    # expression's own `json_object(...)` call below produces for a customer with zero matching
+    # rows (DuckDB's json_object is never null, so the SQL's COALESCE fallback never actually
+    # fires -- this literal exists to document the shape, and the leakage suite's empty-case
+    # test asserts the two agree byte for byte). `json.dumps` with `sort_keys=True` would
+    # alphabetize and add spaces, producing a different (still valid, but non-identical) string.
+    empty_json = json.dumps({"short": 0, "medium": 0, "long": 0}, separators=(",", ":"))
     return FeatureTransform(
         name="session_dwell",
         output_column="session_dwell_counts_json",
@@ -337,16 +344,16 @@ def _cart_state() -> FeatureTransform:
         window_days=None,
         sql_expression=(
             "GREATEST(COALESCE(("
-            "SELECT COALESCE(SUM(CASE WHEN e.type = 'add_to_cart' "
+            "SELECT (COALESCE(SUM(CASE WHEN e.type = 'add_to_cart' "
             "THEN (e.payload::JSON ->> 'quantity')::BIGINT ELSE 0 END), 0) "
             "- COALESCE(SUM(CASE WHEN e.type = 'cart_remove' "
-            "THEN (e.payload::JSON ->> 'quantity')::BIGINT ELSE 0 END), 0) "
+            "THEN (e.payload::JSON ->> 'quantity')::BIGINT ELSE 0 END), 0))::BIGINT "
             "FROM events e WHERE e.customer_id = grid_anchor.customer_id "
             "AND e.type IN ('add_to_cart', 'cart_remove') AND e.ts <= grid_anchor.as_of_ts "
             "AND e.ts > COALESCE((SELECT MAX(c.ts) FROM events c "
             "WHERE c.customer_id = grid_anchor.customer_id "
             "AND c.type IN ('cart_abandon', 'order_placed') "
-            "AND c.ts <= grid_anchor.as_of_ts), TIMESTAMP '1970-01-01')"
+            "AND c.ts <= grid_anchor.as_of_ts), TIMESTAMPTZ '1970-01-01+00')"
             "), 0), 0)"
         ),
     )
@@ -373,7 +380,9 @@ def _abandonment_history() -> FeatureTransform:
 @register_transform
 def _micro_conversion_aggregates() -> FeatureTransform:
     window_days = 30
-    empty_json = json.dumps({"scroll": 0, "filter_apply": 0, "dwell": 0}, sort_keys=True)
+    # Key order/separators pinned to match the SQL's own json_object(...) output byte for byte --
+    # see _session_dwell's comment for why this matters even though the SQL fallback never fires.
+    empty_json = json.dumps({"scroll": 0, "filter_apply": 0, "dwell": 0}, separators=(",", ":"))
     return FeatureTransform(
         name="micro_conversion_aggregates",
         output_column="micro_conversion_counts_json",

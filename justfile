@@ -43,6 +43,13 @@ simulate profile="default":
 ingest profile="default":
     uv run python -m nextmove.ingest --profile {{ trim_start_match(profile, "profile=") }}
 
+# Materialize the daily feature grid (D-19, FEAT-01, FEAT-02): DuckDB ASOF point-in-time
+# computation over the canonical events table plan 01-09's `just ingest` wrote. Reads
+# `data/canonical/events.parquet` and writes `data/features/feature_grid.parquet`.
+# `just features profile="tiny"` for the fast unit-test profile.
+features profile="default":
+    uv run python -m nextmove.features --profile {{ trim_start_match(profile, "profile=") }}
+
 # On-demand memory/wall-clock budget check (ENG-08) -- gated behind an env var so neither the
 # default suite nor CI runs it. Currently runs only the simulator's budget suite; plan 01-11
 # widens this recipe's *body* once the ingest and features budget suites exist in later waves,
