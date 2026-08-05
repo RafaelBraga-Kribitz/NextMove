@@ -53,11 +53,11 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
 
 ### Feature Layer (FEAT)
 
-- [ ] **FEAT-01**: Versioned feature tables keyed by `(customer_id, as_of_ts)` provide RFM, session
+- [x] **FEAT-01**: Versioned feature tables keyed by `(customer_id, as_of_ts)` provide RFM, session
       dynamics (visits, depth, dwell), category affinity, price-sensitivity proxy, message-fatigue
       counters, cart state, abandonment history, and micro-conversion aggregates.
 
-- [ ] **FEAT-02**: Features are computed strictly `as_of` decision time and all train/evaluation
+- [x] **FEAT-02**: Features are computed strictly `as_of` decision time and all train/evaluation
       splits are time-aware; random splits on behavioral data are banned and leakage tests are part
       of the test suite.
 
@@ -385,8 +385,8 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
-| FEAT-01 | Phase 1 | Pending |
-| FEAT-02 | Phase 1 | Pending |
+| FEAT-01 | Phase 1 | Complete |
+| FEAT-02 | Phase 1 | Complete |
 | ENG-01 | Phase 1 | Complete |
 | ENG-03 | Phase 1 | Complete |
 | ENG-04 | Phase 1 | Complete |

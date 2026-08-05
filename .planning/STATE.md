@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-09-PLAN.md
-last_updated: "2026-08-04T22:50:21.729Z"
+stopped_at: Completed 01-10-PLAN.md
+last_updated: "2026-08-05T01:53:53.364Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -30,7 +30,7 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 10 of 11
+Plan: 11 of 11
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
@@ -38,7 +38,7 @@ Last activity: 2026-08-04 — Phase 01 execution started
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [████████░░] 82%
 | Phase 01 P07 | 14min | 3 tasks | 10 files |
 | Phase 01 P08 | ~5h | 3 tasks | 17 files |
 | Phase 01 P09 | ~4h | 3 tasks | 12 files |
+| Phase 01 P10 | 165min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,10 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P09] PipelineStage/RejectRecord physically defined in semantic.py not pipeline.py to break a circular import (pipeline needs run_semantic_gates from semantic; semantic's GateResult needs RejectRecord) -- pipeline.py re-exports both
 - [Phase ?]: [Phase 1 P09] Tasks executed in dependency order (2, then 1, then 3) rather than plan-numeric order, forced by the semantic.py/pipeline.py import direction
 - [Phase ?]: [Phase 1 P09] Scale-invariant growth budget assertions bound against each run's own observed batch-fill ratio (demo/tiny max_events_part_rows), not customer count -- tiny's total event count is smaller than one VALIDATION_BATCH_SIZE batch
+- [Phase ?]: [Phase 1 P10] window_days is a per-transform module constant in definitions.py mirroring config/features.yaml, not read from FeaturesConfig.params at resolve time -- required for FEATURE_SET_VERSION to be a genuine uncalled module constant
+- [Phase ?]: [Phase 1 P10] FeatureTransform.sql_expression is a correlated scalar subquery, not the row an ASOF LEFT JOIN itself returns -- a plain ASOF join can't express windowed COUNT/SUM aggregates; the join establishes the inclusive boundary structurally, each transform's subquery re-enforces it independently
+- [Phase ?]: [Phase 1 P10] time_aware_split boundary corrected to as_of_ts<=boundary_ts trains / >boundary_ts tests, against the plan's own self-contradictory action-text prose, matching its must_haves.truths and acceptance criteria instead
+- [Phase ?]: [Phase 1 P10] Rule 1 bug: naive TIMESTAMP grid literals silently shifted the ASOF boundary by DuckDB's session-local TimeZone (Europe/Vienna here vs UTC on CI) when compared against the TIMESTAMPTZ events.ts column; fixed with explicit +00-offset TIMESTAMPTZ literals -- caught by the leakage suite's explicit boundary test
 
 ### Pending Todos
 
@@ -151,6 +156,7 @@ None yet.
 - [Phase 1 P08] ENG-08 peak-RSS assertion (tests/integration/test_simulation_budget.py TestPeakResidentMemory / scale-invariant RSS-ratio) has never run to completion -- self-skips on this Windows dev machine (POSIX-only resource module), same open item as plan 01-06's peak-RSS test. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven.
 - [Phase 1 P08] just budget profile="default" (50k customers, 548-day horizon) has never been run to completion in this session -- demo-scale (2000 customers) took ~3-4 min uninstrumented, so default scale plausibly takes on the order of an hour. Should be run once before treating the phase's laptop-reproducibility claim as proven at default scale.
 - [Phase 1 P09] ENG-08 peak-RSS assertions in tests/integration/test_ingest_budget.py have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06 and 01-08. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the ingest path.
+- [Phase 1 P10] ENG-08 peak-RSS assertions in tests/integration/test_features_budget.py (TestPeakResidentMemory / TestScaleInvariantGrowth's RSS half) have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06/01-08/01-09. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the features path.
 
 ## Deferred Items
 
@@ -162,8 +168,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T22:50:11.304Z
-Stopped at: Completed 01-09-PLAN.md
+Last session: 2026-08-05T01:53:53.353Z
+Stopped at: Completed 01-10-PLAN.md
 Resume file: None
 
 Next: `/gsd-execute-phase 1`
