@@ -51,15 +51,43 @@ features profile="default":
     uv run python -m nextmove.features --profile {{ trim_start_match(profile, "profile=") }}
 
 # On-demand memory/wall-clock budget check (ENG-08) -- gated behind an env var so neither the
-# default suite nor CI runs it. Currently runs only the simulator's budget suite; plan 01-11
-# widens this recipe's *body* once the ingest and features budget suites exist in later waves,
-# so one command covers the whole ENG-08 story rather than only the simulator's third of it.
-# This plan creates the recipe and owns its name; 01-11 extends the body and nothing else.
+# default suite nor CI runs it. Widened by plan 01-11 to run all three stages' budget suites --
+# simulator, ingest, features -- so one command covers the whole ENG-08 story rather than only
+# the simulator's third of it. Plan 01-08 created this recipe and owns its name; 01-11 owns
+# only the body.
 budget profile="default":
-    NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE={{ trim_start_match(profile, "profile=") }} uv run pytest tests/integration/test_simulation_budget.py -m slow -q
+    NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE={{ trim_start_match(profile, "profile=") }} uv run pytest tests/integration/test_simulation_budget.py tests/integration/test_ingest_budget.py tests/integration/test_features_budget.py -m slow -q
 
-# Full deterministic pipeline: simulate -> ingest -> features -> ... -> report
-# NOT YET WIRED — plan 01-11 replaces this body with the real DVC pipeline invocation.
-reproduce:
-    @echo "reproduce: not yet wired (plan 01-11 replaces this body with the DVC pipeline)"
-    @exit 1
+# Full deterministic pipeline: simulate -> ingest -> features, via the declared DVC DAG
+# (dvc.yaml). `just reproduce` for the `default` profile; `just reproduce profile="tiny"` (or
+# "ci"/"demo") to run a smaller profile. This is the one command ENG-08/D-14 names: it runs
+# entirely on a laptop with no cloud dependency, and `dvc repro` skips any stage whose deps and
+# config hash are unchanged since the last run.
+#
+# `dvc repro` (this dvc version) has no CLI flag to override a `vars:` value at invocation
+# time -- that override mechanism (`-S`/`--set-param`) exists only on `dvc exp run`, which
+# creates a separate experiment ref rather than updating this repo's own `dvc.lock`. This
+# recipe instead rewrites `dvc.yaml`'s `vars: - profile: <value>` line in place before calling
+# `dvc repro`, which is the documented workaround for parameterizing a checked-in `dvc.yaml`
+# pipeline without `dvc exp run`. `cmd` is part of what DVC hashes per stage, so switching
+# profiles correctly invalidates the stage cache, and re-running with the same profile is a
+# genuine no-op (dvc.yaml's only change is the resolved cmd text, which is identical run to
+# run for a fixed profile).
+reproduce profile="default":
+    #!/usr/bin/env sh
+    set -eu
+    p="{{ trim_start_match(profile, "profile=") }}"
+    sed -i "s/^  - profile: .*/  - profile: ${p}/" dvc.yaml
+    uv run dvc repro simulate ingest features
+
+# Inspect one table's full content-hash lineage chain (DATA-04): the config hash and content
+# hash of the table itself, and of every input table it was derived from, walked transitively.
+# `just lineage feature_grid` after a `just reproduce` run.
+lineage table:
+    uv run python -m nextmove.storage {{ table }}
+
+# Remove all generated data tables (raw/canonical/features/ground_truth/lineage) without
+# touching the DVC cache (`.dvc/cache`) -- a clean re-run of `just reproduce` starts from zero
+# without losing DVC's content-addressable object store.
+clean:
+    rm -rf data

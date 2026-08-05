@@ -1,0 +1,59 @@
+# The three pipeline stages (ENG-08, ENG-09, D-14). Stage names match `Stage`'s three members
+# in src/nextmove/storage/paths.py exactly -- each stage's lineage fragment
+# (data/lineage/{stage}.parquet) is named for its Stage member, so a drifted stage name here
+# would produce a fragment no stage declares (plan 01-11).
+#
+# No stage passes `--out`: all three write to the storage layer's default DATA_ROOT, which is
+# what makes these repo-relative `outs` paths correct. `--out` exists only for the golden
+# suite (tests/golden/test_reproducibility.py), which needs two independent output trees from
+# one profile -- that is a test concern, not a pipeline concern.
+#
+# No stage out carries a keep-on-rebuild flag: dvc repro removes a stage's outs before
+# re-executing it, so `ingest` always rebuilds data/canonical/ in full from data/raw/ rather
+# than appending to a surviving table. The two paths (rematerialize vs. append-only direct
+# invocation) are byte-equal for identical input; the golden suite proves it with a forced
+# re-execution digest comparison. Keeping an out across reruns would put the canonical zone
+# outside DVC's staleness detection, reopening the reproducibility hole this plan exists to
+# close.
+#
+# No off-laptop storage backend is configured anywhere in this file: ENG-08 forbids a cloud
+# dependency, and DVC's local cache is sufficient for the laptop-only guarantee.
+vars:
+  - profile: default
+
+stages:
+  simulate:
+    cmd: uv run python -m nextmove.simulator --profile ${profile}
+    deps:
+      - config
+      - src/nextmove/simulator
+      - src/nextmove/config
+      - src/nextmove/storage
+    outs:
+      - data/raw
+      - data/ground_truth
+      - data/lineage/simulate.parquet
+
+  ingest:
+    cmd: uv run python -m nextmove.ingest --profile ${profile}
+    deps:
+      - data/raw
+      - src/nextmove/ingest
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config/data_quality.yaml
+    outs:
+      - data/canonical
+      - data/lineage/ingest.parquet
+
+  features:
+    cmd: uv run python -m nextmove.features --profile ${profile}
+    deps:
+      - data/canonical
+      - src/nextmove/features
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config/features.yaml
+    outs:
+      - data/features
+      - data/lineage/features.parquet
