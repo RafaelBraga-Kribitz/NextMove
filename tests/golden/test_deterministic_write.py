@@ -6,13 +6,16 @@ trivial fixture before the simulator's realism logic exists, so every later chan
 validated against a working harness.
 """
 
+import datetime as _dt
 import hashlib
 import random
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 from pydantic import BaseModel
 
@@ -733,6 +736,257 @@ def test_streaming_uniqueness_detects_duplicate_straddling_batches():
     with pytest.raises(ValueError, match=r"\('tick', 'sku'\)"):
         _parquet_module.write_parquet_stream(reader, dest, ("tick", "sku"), {})
     assert not dest.exists()
+
+
+# --------------------------------------------------------------------------------------
+# Tight-memory dedupe merge shape (G-01-1 gap closure, UAT Test 1)
+#
+# Parameters tuned on this machine (2026-08-05): 20 parts x 20,000 rows (400,000 rows
+# total) with a 400-byte payload column, merged with dedupe_on="event_id" differing from
+# sort_key=("customer_id", "ts", "event_id") against a monkeypatched
+# STORAGE_MEMORY_LIMIT_MB of 100. This reliably reproduces the DuckDB
+# double-blocking-operator hazard documented in .planning/debug/ingest-oom-default-scale.md:
+# the legacy single-statement (QUALIFY window + outer ORDER BY) shape fails in ~1.1s with
+# "Out of Memory Error: failed to pin block of size 256.0 KiB (95.3 MiB/95.3 MiB used)" --
+# the same error signature (differing only in the reported MiB figures) that aborted the
+# real 24.7M-row ingest events merge at 512MB. Fixture generation takes ~1.3s and the
+# two-stage (materialize-then-sort) shape completes in under 2s total; the whole new
+# section's wall clock is well under the ~120s budget.
+# --------------------------------------------------------------------------------------
+
+_TIGHT_MEMORY_MERGE_LIMIT_MB = 100
+_TIGHT_MEMORY_MERGE_N_PARTS = 20
+_TIGHT_MEMORY_MERGE_ROWS_PER_PART = 20_000
+_TIGHT_MEMORY_MERGE_PAYLOAD_WIDTH = 400
+
+_MERGE_FIXTURE_BASE_TS = _dt.datetime(2024, 1, 1, tzinfo=_dt.UTC)
+
+
+def _build_tight_memory_dedupe_fixture(
+    tmp_path: Path, n_parts: int, rows_per_part: int, payload_width: int
+) -> tuple[list[Path], int]:
+    """Build `n_parts` Parquet part files directly via `pyarrow.parquet.write_table` --
+    not `write_part_file`, which would pay Pydantic construction cost per row -- carrying
+    exactly four columns in order: `event_id` (string), `customer_id` (string), `ts`
+    (`pa.timestamp("us", tz="UTC")`, strictly increasing within a customer), and `payload`
+    (string, a fixed-width padding blob).
+
+    Introduces exactly one deliberate cross-part duplicate `event_id` at each part
+    boundary -- the first row of every part after the first reuses the immediately
+    preceding part's last row's `event_id` -- so the dedupe stage is genuinely exercised.
+    Every surviving `(customer_id, ts, event_id)` triple stays unique because `event_id`
+    alone is unique among the rows dedupe leaves behind. Returns the part paths and the
+    expected post-dedupe row count.
+    """
+    schema = pa.schema(
+        [
+            pa.field("event_id", pa.string()),
+            pa.field("customer_id", pa.string()),
+            pa.field("ts", pa.timestamp("us", tz="UTC")),
+            pa.field("payload", pa.string()),
+        ]
+    )
+    padding = "p" * payload_width
+    n_customers = max(1, rows_per_part // 4)
+    customer_occurrence: dict[int, int] = {}
+    part_dir = tmp_path / "tight_memory_dedupe_parts"
+    part_dir.mkdir(parents=True, exist_ok=True)
+    part_paths: list[Path] = []
+    previous_last_event_id: str | None = None
+    global_row_index = 0
+    for part_idx in range(n_parts):
+        event_ids: list[str] = []
+        customer_ids: list[str] = []
+        timestamps: list[_dt.datetime] = []
+        for row_in_part in range(rows_per_part):
+            customer_index = global_row_index % n_customers
+            occurrence = customer_occurrence.get(customer_index, 0)
+            customer_occurrence[customer_index] = occurrence + 1
+            event_ids.append(f"evt-{part_idx:04d}-{row_in_part:06d}")
+            customer_ids.append(f"cust-{customer_index:05d}")
+            timestamps.append(
+                _MERGE_FIXTURE_BASE_TS + _dt.timedelta(seconds=customer_index * 10_000 + occurrence)
+            )
+            global_row_index += 1
+        if previous_last_event_id is not None:
+            event_ids[0] = previous_last_event_id
+        previous_last_event_id = event_ids[-1]
+        table = pa.table(
+            {
+                "event_id": event_ids,
+                "customer_id": customer_ids,
+                "ts": timestamps,
+                "payload": [padding] * rows_per_part,
+            },
+            schema=schema,
+        )
+        part_path = part_dir / f"part-{part_idx:06d}.parquet"
+        pq.write_table(table, part_path)
+        part_paths.append(part_path)
+    expected_row_count = n_parts * rows_per_part - (n_parts - 1)
+    return part_paths, expected_row_count
+
+
+@pytest.mark.slow
+def test_dedupe_merge_with_a_different_sort_key_completes_under_a_tight_memory_limit(
+    tmp_path, resolved_config, monkeypatch
+):
+    """A dedupe merge whose `dedupe_on` ("event_id") differs from `sort_key`
+    ("customer_id", "ts", "event_id") -- the ingest events merge's exact shape, and the
+    only call site in the codebase with that shape -- must complete over a part set that
+    comfortably exceeds a tight memory ceiling instead of raising DuckDB's "Out of Memory
+    Error: failed to pin block" (G-01-1, .planning/debug/ingest-oom-default-scale.md).
+    Fails on the unmodified single-statement implementation with that exact error; passes
+    once the merge is split into a materialized dedupe stage and a separate sort stage.
+    Deliberately does not read the merged table into Arrow -- at this fixture size that
+    would itself allocate hundreds of megabytes and muddy what the test is measuring.
+    """
+    monkeypatch.setattr(repository_module, "STORAGE_MEMORY_LIMIT_MB", _TIGHT_MEMORY_MERGE_LIMIT_MB)
+    part_paths, expected_row_count = _build_tight_memory_dedupe_fixture(
+        tmp_path,
+        _TIGHT_MEMORY_MERGE_N_PARTS,
+        _TIGHT_MEMORY_MERGE_ROWS_PER_PART,
+        _TIGHT_MEMORY_MERGE_PAYLOAD_WIDTH,
+    )
+    dest = st.write_table_from_parts(
+        part_paths,
+        "tight_memory_events",
+        st.Zone.CANONICAL,
+        ("customer_id", "ts", "event_id"),
+        resolved_config,
+        st.Stage.INGEST,
+        root=tmp_path,
+        dedupe_on="event_id",
+        record_lineage=False,
+    )
+    assert pq.ParquetFile(dest).metadata.num_rows == expected_row_count
+
+
+@pytest.mark.slow
+def test_the_single_query_dedupe_and_sort_shape_exhausts_the_same_budget(
+    tmp_path, resolved_config, monkeypatch
+):
+    """Control for the test above. Proves the legacy single-statement shape -- one QUALIFY
+    window operator chained directly into an outer ORDER BY in the same query -- really
+    does exhaust the tight memory budget the fixed merge completes under, so the sibling
+    test is proof the two-stage split actually fixes something rather than a tautology
+    that would pass regardless of the merge's shape. If this control ever starts passing
+    (the amplification stops reproducing at these parameters on whatever machine runs it),
+    the correct response is to re-tune the `_TIGHT_MEMORY_MERGE_*` constants upward -- or,
+    if DuckDB's own documented multiple-blocking-operator memory-accounting hazard has
+    genuinely been resolved upstream, to record that explicitly. Never respond by deleting
+    or weakening the sibling test: an unprovoked control means it proves nothing.
+    """
+    monkeypatch.setattr(repository_module, "STORAGE_MEMORY_LIMIT_MB", _TIGHT_MEMORY_MERGE_LIMIT_MB)
+    part_paths, _expected_row_count = _build_tight_memory_dedupe_fixture(
+        tmp_path,
+        _TIGHT_MEMORY_MERGE_N_PARTS,
+        _TIGHT_MEMORY_MERGE_ROWS_PER_PART,
+        _TIGHT_MEMORY_MERGE_PAYLOAD_WIDTH,
+    )
+    part_list_sql = (
+        "[" + ", ".join(repository_module._sql_quote(str(Path(p))) for p in part_paths) + "]"
+    )
+    order_by = repository_module._order_by_clause(("customer_id", "ts", "event_id"))
+    legacy_sql = (
+        f"SELECT * FROM read_parquet({part_list_sql}) "
+        f'QUALIFY row_number() OVER (PARTITION BY "event_id" ORDER BY {order_by}) = 1 '
+        f"ORDER BY {order_by}"
+    )
+    con = repository_module.connect(root=tmp_path)
+    try:
+        with pytest.raises(Exception) as excinfo:
+            row_group_size = repository_module.PARQUET_ROW_GROUP_SIZE
+            reader = con.execute(legacy_sql).to_arrow_reader(row_group_size)
+            for _batch in reader:
+                pass
+        assert "Out of Memory Error" in str(excinfo.value)
+    finally:
+        con.close()
+
+
+def test_a_dedupe_merge_never_executes_one_statement_that_both_dedupes_and_sorts(
+    tmp_path, resolved_config, monkeypatch
+):
+    """Runtime guard (not a source-text read): a dedupe merge must execute more than one
+    SQL statement, and no single executed statement may contain both a dedupe construct
+    (`QUALIFY` or `row_number(`) and an `ORDER BY` outside its own window's `OVER` clause --
+    stacking those two blocking operators in one statement is exactly the DuckDB
+    memory-accounting hazard G-01-1 traces to. Each `OVER (...)` clause is blanked out
+    before the assertion runs, because a window's own internal `ORDER BY` is legitimate
+    and must not trip this check."""
+    executed_sql: list[str] = []
+    real_connect = repository_module.connect
+
+    class _RecordingConnection:
+        """Thin proxy recording every SQL string passed to `execute`, delegating
+        `execute` and `close` (and everything else) to the real connection."""
+
+        def __init__(self, real_con):
+            self._real_con = real_con
+
+        def execute(self, sql, *args, **kwargs):
+            executed_sql.append(sql)
+            return self._real_con.execute(sql, *args, **kwargs)
+
+        def close(self):
+            return self._real_con.close()
+
+        def __getattr__(self, name):
+            return getattr(self._real_con, name)
+
+    def _connect_recording(*args, **kwargs):
+        return _RecordingConnection(real_connect(*args, **kwargs))
+
+    monkeypatch.setattr(repository_module, "connect", _connect_recording)
+
+    root = tmp_path
+    part0 = st.write_part_file(
+        [EventLikeRow(event_id="e1", tick=1, sku="a", qty=1)],
+        "guard_dedupe_parts",
+        0,
+        ("tick", "sku"),
+        root=root,
+    )
+    part1 = st.write_part_file(
+        [EventLikeRow(event_id="e2", tick=2, sku="b", qty=2)],
+        "guard_dedupe_parts",
+        1,
+        ("tick", "sku"),
+        root=root,
+    )
+    part2 = st.write_part_file(
+        [EventLikeRow(event_id="e1", tick=1, sku="a", qty=99)],
+        "guard_dedupe_parts",
+        2,
+        ("tick", "sku"),
+        root=root,
+    )
+
+    st.write_table_from_parts(
+        [part0, part1, part2],
+        "guard_dedupe_merged",
+        st.Zone.CANONICAL,
+        ("tick", "sku"),
+        resolved_config,
+        st.Stage.INGEST,
+        root=root,
+        dedupe_on="event_id",
+        record_lineage=False,
+    )
+
+    assert len(executed_sql) >= 2, (
+        f"expected a dedupe merge to execute at least two separate SQL statements, got "
+        f"{len(executed_sql)}: {executed_sql!r}"
+    )
+    over_clause_re = re.compile(r"OVER\s*\([^()]*\)", re.IGNORECASE)
+    for sql in executed_sql:
+        blanked = over_clause_re.sub("OVER ( ... )", sql).upper()
+        has_dedupe_construct = "QUALIFY" in blanked or "ROW_NUMBER(" in blanked
+        has_outer_order_by = "ORDER BY" in blanked
+        assert not (has_dedupe_construct and has_outer_order_by), (
+            "statement both dedupes and sorts outside its OVER clause: " + repr(sql)
+        )
 
 
 # --------------------------------------------------------------------------------------
