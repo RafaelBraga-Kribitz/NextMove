@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
-status: executing
-stopped_at: Completed 01-10-PLAN.md
-last_updated: "2026-08-05T01:53:53.364Z"
+status: verifying
+stopped_at: Completed 01-11-PLAN.md (final plan of phase 01)
+last_updated: "2026-08-05T02:42:50.072Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -31,14 +31,14 @@ manager-readable explanation.
 
 Phase: 01 (reproducible-world) — EXECUTING
 Plan: 11 of 11
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-04 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
 2026-08-17). 9 HIGH and 12 non-HIGH findings resolved across cycles 1–3; 4 HIGH and 6 non-HIGH
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: [█████████░] 91%
 | Phase 01 P08 | ~5h | 3 tasks | 17 files |
 | Phase 01 P09 | ~4h | 3 tasks | 12 files |
 | Phase 01 P10 | 165min | 3 tasks | 11 files |
+| Phase 01 P11 | ~2h | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,10 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P10] FeatureTransform.sql_expression is a correlated scalar subquery, not the row an ASOF LEFT JOIN itself returns -- a plain ASOF join can't express windowed COUNT/SUM aggregates; the join establishes the inclusive boundary structurally, each transform's subquery re-enforces it independently
 - [Phase ?]: [Phase 1 P10] time_aware_split boundary corrected to as_of_ts<=boundary_ts trains / >boundary_ts tests, against the plan's own self-contradictory action-text prose, matching its must_haves.truths and acceptance criteria instead
 - [Phase ?]: [Phase 1 P10] Rule 1 bug: naive TIMESTAMP grid literals silently shifted the ASOF boundary by DuckDB's session-local TimeZone (Europe/Vienna here vs UTC on CI) when compared against the TIMESTAMPTZ events.ts column; fixed with explicit +00-offset TIMESTAMPTZ literals -- caught by the leakage suite's explicit boundary test
+- [Phase ?]: [Phase 1 P11] dvc.yaml vars.profile default is 'default' (full production scale), not a fast profile -- a bare just reproduce must target the full simulated history per phase success criterion 1
+- [Phase ?]: [Phase 1 P11] just reproduce sed-patches dvc.yaml's vars.profile line before dvc repro -- this dvc version has no CLI override for vars: outside dvc exp run
+- [Phase ?]: [Phase 1 P11] Zero-row-table proof zeros engagement.base_session_probability and campaigns.send_probability_per_eligible_day rather than n_customers, which is schema-constrained gt=0
+- [Phase ?]: [Phase 1 P11] Added tests/integration/test_dvc_pipeline_structure.py and tests/unit/test_ci_workflow_structure.py (not in plan file list) as the permanent home for the plan's own structural acceptance criteria
 
 ### Pending Todos
 
@@ -157,6 +162,8 @@ None yet.
 - [Phase 1 P08] just budget profile="default" (50k customers, 548-day horizon) has never been run to completion in this session -- demo-scale (2000 customers) took ~3-4 min uninstrumented, so default scale plausibly takes on the order of an hour. Should be run once before treating the phase's laptop-reproducibility claim as proven at default scale.
 - [Phase 1 P09] ENG-08 peak-RSS assertions in tests/integration/test_ingest_budget.py have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06 and 01-08. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the ingest path.
 - [Phase 1 P10] ENG-08 peak-RSS assertions in tests/integration/test_features_budget.py (TestPeakResidentMemory / TestScaleInvariantGrowth's RSS half) have never run to completion on this Windows dev machine -- self-skip (POSIX-only resource module), same open item as plans 01-06/01-08/01-09. Must be confirmed passing on Linux CI before ENG-08 is treated as fully proven for the features path.
+- [Phase 1 P11] The default-profile (50k customers, 548 days) full pipeline run has never been executed to completion in any session. dvc.yaml's committed default targets it. Should be run once before treating phase success criterion 1 as proven at default scale (same class of open item as plan 01-08's just budget profile=default note).
+- [Phase 1 P11] CI's new memory-budget gate (fails on any skipped peak-RSS assertion) has never run on Linux CI yet -- must be confirmed green on the first real CI run before ENG-08's memory bound is treated as measured rather than declared, across all of plans 01-06/01-08/01-09/01-10 and this plan.
 
 ## Deferred Items
 
@@ -168,8 +175,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T01:53:53.353Z
-Stopped at: Completed 01-10-PLAN.md
+Last session: 2026-08-05T02:42:50.060Z
+Stopped at: Completed 01-11-PLAN.md (final plan of phase 01)
 Resume file: None
 
 Next: `/gsd-execute-phase 1`

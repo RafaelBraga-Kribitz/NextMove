@@ -27,7 +27,7 @@ MVP scope. Every requirement maps to exactly one roadmap phase.
       that fails CI. Simulator response functions are never visible to models — models see only
       events.
 
-- [ ] **SIM-03**: Every generative assumption is documented in `SIMULATOR_ASSUMPTIONS.md`, and every
+- [x] **SIM-03**: Every generative assumption is documented in `SIMULATOR_ASSUMPTIONS.md`, and every
       result derived from simulated data is labeled "in simulation" wherever it is reported.
 
 - [x] **SIM-04**: The simulator emits micro-conversion (PCR) events — scroll, filter, dwell class —
@@ -379,7 +379,7 @@ Explicitly excluded. Reasoning preserved so these are not re-added.
 |-------------|-------|--------|
 | SIM-01 | Phase 1 | Complete |
 | SIM-02 | Phase 1 | Complete |
-| SIM-03 | Phase 1 | Pending |
+| SIM-03 | Phase 1 | Complete |
 | SIM-04 | Phase 1 | Complete |
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Complete |

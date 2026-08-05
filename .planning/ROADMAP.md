@@ -51,7 +51,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. CI fails the build if any module in `models/`, `decisions/`, `policies/` or `features/` imports the simulator package.
   5. A reviewer can open `SIMULATOR_ASSUMPTIONS.md` and `docs/adr/001`–`010` and find every generative assumption and every ratified open decision written down — including an explicit ADR resolving OD-7 (DVC vs. content-hashed artifact store) — and can change the seasonality curve, the feature list, or a simulator parameter by editing schema-validated YAML rather than code.
 
-**Plans**: 10/11 plans executed
+**Plans**: 11/11 plans executed
 
 Plans:
 **Wave 1**
@@ -84,7 +84,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 01-11-PLAN.md — DVC pipeline, `just reproduce`, determinism proof, SIMULATOR_ASSUMPTIONS.md (ENG-04, ENG-08, ENG-09, SIM-03)
+- [x] 01-11-PLAN.md — DVC pipeline, `just reproduce`, determinism proof, SIMULATOR_ASSUMPTIONS.md (ENG-04, ENG-08, ENG-09, SIM-03)
 
 ### Phase 2: The Decision Spine
 
@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Reproducible World | 10/11 | In Progress|  |
+| 1. Reproducible World | 11/11 | In Progress|  |
 | 2. The Decision Spine | 0/TBD | Not started | - |
 | 3. The Evaluation Gateway | 0/TBD | Not started | - |
 | 4. The Learned Layer | 0/TBD | Not started | - |
