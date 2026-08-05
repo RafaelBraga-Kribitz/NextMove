@@ -35,12 +35,38 @@ jobs:
       - name: Test suite
         run: uv run pytest -q
 
+      - name: Miniature end-to-end (ci profile, via the DVC pipeline)
+        run: just reproduce profile="ci"
+
+      - name: Golden reproducibility suite
+        run: uv run pytest tests/golden -q -m slow
+
+      # HIGH-10: the RSS gate cannot vanish by permanent skip. Plans 01-08, 01-09 and 01-10
+      # each assert peak process RSS, which is the only instrument that can observe the Arrow
+      # and DuckDB half of ENG-08's budget, and each is specified to skip with a stated reason
+      # where the platform provides no `getrusage` reading -- the case on the Windows
+      # development machine this phase was built on. D-16 makes this Linux runner the
+      # enforcing platform, so a skip here must fail the job rather than pass it silently.
+      # With NEXTMOVE_RUN_DEFAULT_BUDGET=1 set, the only skip condition remaining in any of
+      # the three budget suites is peak-RSS unavailability (see tests/integration/
+      # test_simulation_budget.py, test_ingest_budget.py, test_features_budget.py) -- their
+      # other gating skip is bypassed by the env var -- so any reported skip here is
+      # necessarily that one.
+      - name: Memory budget suite (demo profile; fails the job on any skipped peak-RSS assertion)
+        run: |
+          set -o pipefail
+          NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE=demo uv run pytest \
+            tests/integration/test_simulation_budget.py \
+            tests/integration/test_ingest_budget.py \
+            tests/integration/test_features_budget.py \
+            -m slow -rs -q | tee budget-output.txt
+          if grep -Eq '[1-9][0-9]* skipped' budget-output.txt; then
+            echo "::error::A peak-RSS assertion was skipped on this runner. ENG-08's memory bound must be measured on Linux CI (D-16), not merely declared." >&2
+            exit 1
+          fi
+
       # -----------------------------------------------------------------
       # Ownership notes for future readers of this workflow.
-      #
-      # Plan 01-11 appends two further steps to this job: a miniature
-      # end-to-end run on the `ci` profile, and a golden-file comparison
-      # step. Append after the steps above; do not rewrite this file.
       #
       # Static type checking (mypy) is deliberately absent from this
       # workflow in Phase 1. This is a recorded decision, not an
