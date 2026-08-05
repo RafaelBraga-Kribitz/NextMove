@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: reproducible-world
 status: executing
-stopped_at: Completed 01-11-PLAN.md (final plan of phase 01)
-last_updated: "2026-08-05T16:48:12.682Z"
+stopped_at: Completed 01-12-PLAN.md (gap closure G-01-1)
+last_updated: "2026-08-05T17:06:48.521Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -30,15 +30,15 @@ manager-readable explanation.
 ## Current Position
 
 Phase: 01 (reproducible-world) — EXECUTING
-Plan: 1 of 13
-Status: Executing Phase 01
+Plan: 2 of 13
+Status: Ready to execute
 Last activity: 2026-08-05 — Phase 01 execution started
 `/gsd-plan-review-convergence` (external review by Gemini CLI; Codex quota-blocked until
 2026-08-17). 9 HIGH and 12 non-HIGH findings resolved across cycles 1–3; 4 HIGH and 6 non-HIGH
 from cycle 3 fixed in a final replan verified by gsd-plan-checker only, with no external review
 pass after it. Greenfield; no source code yet.
 
-Progress: [██████████] 100%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [██████████] 100%
 | Phase 01 P09 | ~4h | 3 tasks | 12 files |
 | Phase 01 P10 | 165min | 3 tasks | 11 files |
 | Phase 01 P11 | ~2h | 3 tasks | 12 files |
+| Phase 01-reproducible-world P12 | 50min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ Decisions most likely to bite during Phase 1:
 - [Phase ?]: [Phase 1 P11] just reproduce sed-patches dvc.yaml's vars.profile line before dvc repro -- this dvc version has no CLI override for vars: outside dvc exp run
 - [Phase ?]: [Phase 1 P11] Zero-row-table proof zeros engagement.base_session_probability and campaigns.send_probability_per_eligible_day rather than n_customers, which is schema-constrained gt=0
 - [Phase ?]: [Phase 1 P11] Added tests/integration/test_dvc_pipeline_structure.py and tests/unit/test_ci_workflow_structure.py (not in plan file list) as the permanent home for the plan's own structural acceptance criteria
+- [Phase ?]: [Phase 1 P12] Tight-memory G-01-1 reproduction tuned to 20 parts x 20,000 rows (400k total) with a 400-byte payload against a monkeypatched STORAGE_MEMORY_LIMIT_MB=100 -- reliably reproduces the exact production OOM error signature in ~1.1s, well under the 120s test-section budget
+- [Phase ?]: [Phase 1 P12] write_table_from_parts' dedupe path now runs two DuckDB statements on two connections (materialize QUALIFY-deduped intermediate, close, then sort) instead of one QUALIFY+ORDER BY statement, per DuckDB's documented stacked-blocking-operator remediation; no-dedupe path unchanged
+- [Phase ?]: [Phase 1 P12] Dedupe intermediate lives at data/_staging/_merge_dedupe_<table_name>/ via resolve_staging_path, unlinked before write and removed in a finally via clear_staging so the merge cleans up after itself regardless of caller behavior
 
 ### Pending Todos
 
@@ -188,8 +192,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T02:42:50.060Z
-Stopped at: Completed 01-11-PLAN.md (final plan of phase 01)
+Last session: 2026-08-05T17:06:48.511Z
+Stopped at: Completed 01-12-PLAN.md (gap closure G-01-1)
 Resume file: None
 
 Next: `/gsd-execute-phase 1`
