@@ -372,10 +372,9 @@ def test_lineage_module_does_not_import_repository():
 
 
 # --------------------------------------------------------------------------------------
-# dvc.yaml not yet owned by this plan
+# dvc.yaml is owned by plan 01-11
 # --------------------------------------------------------------------------------------
-
-
-def test_dvc_yaml_does_not_exist_yet():
-    repo_root = Path(_SRC_DIR).parent
-    assert not (repo_root / "dvc.yaml").exists()
+# A guard here previously asserted `dvc.yaml` did NOT exist, encoding "plan 01-11 has not
+# run yet". Plan 01-11 has since wired the pipeline and created it, so the guard was a
+# stale forward reference. Structural coverage of dvc.yaml now lives in
+# tests/integration/test_dvc_pipeline_structure.py.

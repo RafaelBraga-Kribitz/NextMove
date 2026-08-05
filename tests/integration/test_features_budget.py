@@ -519,6 +519,12 @@ class TestCliRedirection:
         run_simulation(resolved, out_root=out_dir)
         _run_ingest_in_process(resolved, out_dir)
 
+        # The default data root may already hold artifacts from a prior legitimate run
+        # (e.g. `just reproduce`), so "does not exist" is not a usable assertion here.
+        # Snapshot it instead and require this --out run to leave it byte-for-byte alone.
+        sentinel = DATA_ROOT / "features" / "feature_grid.parquet"
+        before = sentinel.stat().st_mtime_ns if sentinel.exists() else None
+
         result = subprocess.run(
             [sys.executable, "-m", "nextmove.features", "--profile", "tiny", "--out", str(out_dir)],
             capture_output=True,
@@ -527,7 +533,9 @@ class TestCliRedirection:
         assert result.returncode == 0, result.stderr
         assert "feature_set_version=" in result.stdout
         assert (out_dir / "features" / "feature_grid.parquet").is_file()
-        assert not (DATA_ROOT / "features" / "feature_grid.parquet").exists()
+
+        after = sentinel.stat().st_mtime_ns if sentinel.exists() else None
+        assert before == after, f"--out run wrote to the default data root at {sentinel}"
 
 
 # ---------------------------------------------------------------------------------------

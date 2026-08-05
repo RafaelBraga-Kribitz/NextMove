@@ -390,6 +390,13 @@ class TestArtifactsAndLineage:
         from nextmove.storage import DATA_ROOT
 
         out_dir = tmp_path / "cli_out"
+
+        # The default data root may already hold artifacts from a prior legitimate run
+        # (e.g. `just reproduce`), so "does not exist" is not a usable assertion here.
+        # Snapshot it instead and require this --out run to leave it byte-for-byte alone.
+        sentinel = DATA_ROOT / "raw" / "events_raw.parquet"
+        before = sentinel.stat().st_mtime_ns if sentinel.exists() else None
+
         result = subprocess.run(
             [
                 sys.executable,
@@ -407,7 +414,8 @@ class TestArtifactsAndLineage:
         for zone_dirname, table_name in _TABLE_FILES:
             assert (out_dir / zone_dirname / f"{table_name}.parquet").is_file()
         # This --out run must not have touched the repository's own default data root.
-        assert not (DATA_ROOT / "raw" / "events_raw.parquet").exists()
+        after = sentinel.stat().st_mtime_ns if sentinel.exists() else None
+        assert before == after, f"--out run wrote to the default data root at {sentinel}"
 
 
 # ---------------------------------------------------------------------------------------
