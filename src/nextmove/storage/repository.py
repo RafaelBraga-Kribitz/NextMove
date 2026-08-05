@@ -336,16 +336,36 @@ def write_table_from_parts(
     """Merge `part_paths` into one sorted table **out of core** through DuckDB and stream the
     result into `write_parquet_stream` -- never concatenating parts into one Arrow table.
 
-    DuckDB's sort (and, when `dedupe_on` is given, its window operator) spills to the
-    connection's configured temporary directory once it exceeds `STORAGE_MEMORY_LIMIT_MB`,
-    so the merge's peak allocation is the memory limit plus one row group **at any table
-    size** (HIGH-10). This replaces a design that read every part through
-    `read_parquet_file` and concatenated them into one Arrow table before sorting -- that
-    design bounded the producer's *Python* heap while leaving the merge's Arrow footprint
-    equal to the whole table, which is the entire hazard ENG-08 names and which no
-    `tracemalloc`-based test can observe. Do not reach for a whole-table Arrow
-    concatenation helper here -- that is the exact regression this module's tests guard
-    against.
+    With no `dedupe_on`, the merge is a single blocking sort
+    (`SELECT * FROM read_parquet([...]) ORDER BY <sort_key>`) run on one connection; DuckDB
+    spills that sort to the connection's configured temporary directory once it exceeds
+    `STORAGE_MEMORY_LIMIT_MB`, so this shape's peak allocation is bounded by the memory
+    limit plus one row group **at any table size** (HIGH-10).
+
+    With `dedupe_on`, the merge is deliberately **two separate queries on two separate
+    connections** rather than one query stacking a window operator ahead of an outer sort.
+    Chaining a `QUALIFY row_number() OVER (...)` window operator directly into an outer
+    `ORDER BY` in a single statement is a documented DuckDB memory-accounting hazard: each
+    operator is individually spill-capable, but DuckDB's own troubleshooting guidance warns
+    that stacking multiple blocking operators in one query can still exceed `memory_limit`,
+    with its stated remediation being exactly "break it into stages and materialize." That
+    stacked shape is what aborted the 24.7M-row ingest events merge at a 512MB ceiling with
+    "Out of Memory Error: failed to pin block" (UAT gap G-01-1,
+    .planning/debug/ingest-oom-default-scale.md) and reproduces synthetically at far smaller
+    row counts. So: stage 1 runs the `QUALIFY` dedupe alone and `COPY`s its result to an
+    intermediate Parquet file under `data/_staging/_merge_dedupe_<table_name>/`, on a
+    connection that is closed -- releasing the window operator's buffers and spill files --
+    before stage 2 opens a fresh connection and runs the outer `ORDER BY` alone against that
+    intermediate. The intermediate is removed in a `finally` by this function itself, not
+    left for the caller's later `clear_staging()` call -- two of this function's three call
+    sites are tests that never call it.
+
+    This design replaces one that read every part through `read_parquet_file` and
+    concatenated them into one Arrow table before sorting -- that design bounded the
+    producer's *Python* heap while leaving the merge's Arrow footprint equal to the whole
+    table, which is the entire hazard ENG-08 names and which no `tracemalloc`-based test can
+    observe. Do not reach for a whole-table Arrow concatenation helper here -- that is the
+    exact regression this module's tests guard against.
 
     Raises `ValueError` naming the table when `part_paths` is empty: a zero-part merge has
     no schema source to write from. A producer that must write its table even when no rows
@@ -376,21 +396,49 @@ def write_table_from_parts(
 
     part_list_sql = "[" + ", ".join(_sql_quote(str(Path(p))) for p in part_paths) + "]"
     order_by = _order_by_clause(sort_key)
-    qualify_clause = ""
-    if dedupe_cols:
-        partition_by = ", ".join(f'"{col}"' for col in dedupe_cols)
-        qualify_clause = (
-            f"QUALIFY row_number() OVER (PARTITION BY {partition_by} ORDER BY {order_by}) = 1"
-        )
-    sql = f"SELECT * FROM read_parquet({part_list_sql}) {qualify_clause} ORDER BY {order_by}"
 
-    con = connect(root=root)
-    try:
-        result = con.execute(sql)
-        reader = result.to_arrow_reader(PARQUET_ROW_GROUP_SIZE)
-        write_parquet_stream(reader, dest, sort_key, metadata)
-    finally:
-        con.close()
+    if dedupe_cols is None:
+        # Single blocking operator: one connection, one statement.
+        sql = f"SELECT * FROM read_parquet({part_list_sql}) ORDER BY {order_by}"
+        con = connect(root=root)
+        try:
+            result = con.execute(sql)
+            reader = result.to_arrow_reader(PARQUET_ROW_GROUP_SIZE)
+            write_parquet_stream(reader, dest, sort_key, metadata)
+        finally:
+            con.close()
+    else:
+        # Two blocking operators (dedupe window, then sort) must never share a query --
+        # break it into stages and materialize, per DuckDB's own remediation for the
+        # stacked-blocking-operator memory hazard (G-01-1).
+        dedupe_part_dir = f"_merge_dedupe_{table_name}"
+        intermediate = resolve_staging_path(dedupe_part_dir, 0, root=root)
+        intermediate.unlink(missing_ok=True)
+        try:
+            partition_by = ", ".join(f'"{col}"' for col in dedupe_cols)
+            dedupe_sql = (
+                f"COPY (SELECT * FROM read_parquet({part_list_sql}) QUALIFY row_number() "
+                f"OVER (PARTITION BY {partition_by} ORDER BY {order_by}) = 1) "
+                f"TO {_sql_quote(str(intermediate))} (FORMAT PARQUET)"
+            )
+            con = connect(root=root)
+            try:
+                con.execute(dedupe_sql)
+            finally:
+                con.close()
+
+            sort_sql = (
+                f"SELECT * FROM read_parquet({_sql_quote(str(intermediate))}) ORDER BY {order_by}"
+            )
+            con = connect(root=root)
+            try:
+                result = con.execute(sort_sql)
+                reader = result.to_arrow_reader(PARQUET_ROW_GROUP_SIZE)
+                write_parquet_stream(reader, dest, sort_key, metadata)
+            finally:
+                con.close()
+        finally:
+            clear_staging(dedupe_part_dir, root=root)
 
     if record_lineage:
         # Row count is read from the Parquet footer metadata, not the data itself, so
