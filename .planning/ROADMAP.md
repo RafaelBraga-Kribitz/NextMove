@@ -51,7 +51,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. CI fails the build if any module in `models/`, `decisions/`, `policies/` or `features/` imports the simulator package.
   5. A reviewer can open `SIMULATOR_ASSUMPTIONS.md` and `docs/adr/001`–`010` and find every generative assumption and every ratified open decision written down — including an explicit ADR resolving OD-7 (DVC vs. content-hashed artifact store) — and can change the seasonality curve, the feature list, or a simulator parameter by editing schema-validated YAML rather than code.
 
-**Plans**: 11/11 plans executed
+**Plans**: 13 plans (11/11 executed; 2 gap-closure plans pending from 01-UAT.md)
 
 Plans:
 **Wave 1**
@@ -85,6 +85,11 @@ Plans:
 **Wave 7** *(blocked on Wave 6 completion)*
 
 - [x] 01-11-PLAN.md — DVC pipeline, `just reproduce`, determinism proof, SIMULATOR_ASSUMPTIONS.md (ENG-04, ENG-08, ENG-09, SIM-03)
+
+**Gap closure** *(from 01-UAT.md; both are wave 1 and independent of each other)*
+
+- [ ] 01-12-PLAN.md — G-01-1: split the `write_table_from_parts` dedupe merge into two materialized stages so default-scale ingest stops OOM'ing under the 512MB DuckDB ceiling (ENG-04, ENG-08)
+- [ ] 01-13-PLAN.md — G-01-2: give the peak-RSS assertions their own marker and make the Linux CI gate actually select, run and enforce them (ENG-08)
 
 ### Phase 2: The Decision Spine
 
