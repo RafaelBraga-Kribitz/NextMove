@@ -575,6 +575,7 @@ def test_merge_peak_rss_stays_under_budget(tmp_path):
     script = f"""
 import resource
 import sys
+from pathlib import Path
 sys.path.insert(0, {str(Path(__file__).resolve().parents[2] / "src")!r})
 from pydantic import BaseModel
 import nextmove.storage as st
@@ -585,7 +586,7 @@ class Row(BaseModel):
     sku: str
     payload: str
 
-root = {str(tmp_path)!r}
+root = Path({str(tmp_path)!r})
 rc = load_config("tiny")
 
 # Each part is padded so the combined on-disk size comfortably exceeds STORAGE_MEMORY_LIMIT_MB.
