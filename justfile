@@ -54,9 +54,23 @@ features profile="default":
 # default suite nor CI runs it. Widened by plan 01-11 to run all three stages' budget suites --
 # simulator, ingest, features -- so one command covers the whole ENG-08 story rather than only
 # the simulator's third of it. Plan 01-08 created this recipe and owns its name; 01-11 owns
-# only the body.
+# only the body. Gap closure G-01-2 (plan 01-13) widened the filter from `-m slow` to `-m "slow
+# or peak_rss"`: `slow` still selects the on-demand default-profile wall-clock/heap check
+# (test_default_profile_completes_within_its_stated_budget), and `peak_rss` now additionally
+# selects the six dedicated peak-RSS assertions, so this recipe keeps covering the whole
+# ENG-08 story rather than losing the RSS half to the marker split.
 budget profile="default":
-    NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE={{ trim_start_match(profile, "profile=") }} uv run pytest tests/integration/test_simulation_budget.py tests/integration/test_ingest_budget.py tests/integration/test_features_budget.py -m slow -q
+    NEXTMOVE_RUN_DEFAULT_BUDGET=1 NEXTMOVE_BUDGET_PROFILE={{ trim_start_match(profile, "profile=") }} uv run pytest tests/integration/test_simulation_budget.py tests/integration/test_ingest_budget.py tests/integration/test_features_budget.py -m "slow or peak_rss" -q
+
+# Reproduce the CI peak-RSS step's exact test selection locally (gap closure G-01-2). No
+# arguments, no env vars: the six selected assertions take their budgets from
+# `_PROFILE_BUDGETS["demo"]` directly rather than an overridable profile. Runnable on Linux;
+# self-skips on Windows (no POSIX `resource` module), which is precisely why CI is the
+# enforcing platform for ENG-08 (D-16). Deliberately omits an explicit `-q`: pyproject.toml's
+# `addopts` already supplies one, and a second `-q` on pytest 9.1 suppresses the "N passed" /
+# "N skipped" summary line this recipe's CI counterpart greps for.
+budget-rss:
+    uv run pytest tests/integration/test_simulation_budget.py tests/integration/test_ingest_budget.py tests/integration/test_features_budget.py -m peak_rss -rs
 
 # Full deterministic pipeline: simulate -> ingest -> features, via the declared DVC DAG
 # (dvc.yaml). `just reproduce` for the `default` profile; `just reproduce profile="tiny"` (or
