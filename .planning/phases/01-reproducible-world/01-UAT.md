@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-reproducible-world
 source: [01-VERIFICATION.md]
 started: 2026-08-05T00:00:00Z
-updated: 2026-08-05T15:20:00Z
+updated: 2026-08-05T16:00:00Z
 ---
 
 ## Current Test
@@ -128,10 +128,32 @@ blocked: 0
     independent root (repro_b) were never reached — not a hash mismatch, an unrunnable stage."
   severity: blocker
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "write_table_from_parts() (src/nextmove/storage/repository.py:369-393) builds a
+    single DuckDB query stacking a QUALIFY row_number() window operator (for dedupe_on) with an
+    outer ORDER BY. For the ingest events merge (src/nextmove/ingest/pipeline.py:281),
+    dedupe_on='event_id' differs from sort_key=CANONICAL_SORT_KEY=('customer_id','ts',
+    'event_id'), so DuckDB cannot reuse the window operator's sort for the final ORDER BY and
+    runs two independent full-dataset external sorts in one query plan. DuckDB's own
+    troubleshooting docs name 'stacking multiple blocking operators in one query' as a
+    documented memory-accounting hazard that can exceed memory_limit even though each operator
+    is individually spill-capable — confirmed synthetically at 3M/6M rows with the byte-identical
+    error signature. Only call site in the codebase with dedupe_on != sort_key (features/compute.py
+    never passes dedupe_on; the rejects merge has dedupe_on == sort_key). Never manifested at
+    tiny/ci scale — not enough rows to exhaust 512MB even with the inefficient double sort."
+  artifacts:
+    - path: "src/nextmove/storage/repository.py"
+      issue: "write_table_from_parts (lines 369-393) chains a QUALIFY window operator and an
+        outer ORDER BY in one query when dedupe_on != sort_key; docstring (340-348) incorrectly
+        claims peak allocation is bounded by memory_limit + one row group in all cases"
+    - path: "src/nextmove/ingest/pipeline.py"
+      issue: "events merge (line 281) passes dedupe_on='event_id' with
+        sort_key=CANONICAL_SORT_KEY — the one call site that triggers the double-sort shape"
+  missing:
+    - "Split the events merge into two materialized stages (dedupe, then sort) instead of one
+      chained query, per DuckDB's own guidance against stacking blocking operators"
+    - "Correct or scope the write_table_from_parts docstring's peak-memory claim, which does not
+      hold when dedupe_on differs from sort_key"
+  debug_session: ".planning/debug/ingest-oom-default-scale.md"
 
 - gap_id: G-01-2
   truth: "Linux CI Memory budget suite executes peak-process-RSS assertions in
@@ -145,9 +167,45 @@ blocked: 0
     measured. Skip-gate grep did not run after pytest failure."
   severity: blocker
   test: 2
-  root_cause: ""
+  root_cause: "Two independent, stacked bugs, not one. Bug A (marker-tagging omission): the CI
+    step and the Justfile's `budget` recipe both filter with `-m slow`, but across all three
+    budget test files only test_default_profile_completes_within_its_stated_budget carries
+    @pytest.mark.slow — the three test_demo_subprocess_peak_rss_under_budget tests the UAT item
+    actually names were written unmarked by plans 01-08/01-09/01-10, and plan 01-11 wrote the
+    -m slow filter assuming it would select them without verifying the marker was present (the
+    step was unrunnable on the Windows dev machine used by all 5 contributing plans, so nothing
+    caught the gap before this session's first real Linux CI run). Bug B (budget too tight): the
+    one test -m slow does collect asserts wall-clock before peak RSS; CI's demo-profile budget is
+    600.0s but the actual run took 638.4s (~6% over), so the AssertionError fires before
+    measure_subprocess_peak_rss() is ever called — independent of Bug A, since fixing only the
+    marker still leaves this same wall-clock-bound test in the invoked set. Secondary masking
+    effect: GitHub Actions' default bash -eo pipefail plus the step's own set -o pipefail means
+    pytest's non-zero exit aborts the script before the step's own grep-based skip-gate ('fail if
+    any peak-RSS assertion was skipped') ever runs, so that gate itself remains unexercised."
   artifacts:
+    - path: ".github/workflows/ci.yml"
+      issue: "'Memory budget suite' step (lines 55-66): -m slow test selection and bash -e shell
+        semantics that abort before the skip-detection grep gate runs on pytest failure"
+    - path: "tests/integration/test_simulation_budget.py"
+      issue: "test_demo_subprocess_peak_rss_under_budget (line 129) unmarked; the sole slow-marked
+        test (line 427/428) asserts wall-clock before peak RSS with a 600.0s demo-profile budget
+        that CI exceeded (638.4s)"
+    - path: "tests/integration/test_ingest_budget.py"
+      issue: "test_demo_subprocess_peak_rss_under_budget (line 178) unmarked — zero @pytest.mark.slow in file"
+    - path: "tests/integration/test_features_budget.py"
+      issue: "test_demo_subprocess_peak_rss_under_budget (line 197) unmarked — zero @pytest.mark.slow in file"
+    - path: "Justfile"
+      issue: "budget recipe (lines 58-59) has the identical -m slow filter bug locally"
     - "https://github.com/RafaelBraga-Kribitz/NextMove/actions/runs/31015357302"
     - "https://github.com/RafaelBraga-Kribitz/NextMove"
-  missing: []
-  debug_session: ""
+  missing:
+    - "Add @pytest.mark.slow to the three test_demo_subprocess_peak_rss_under_budget tests (and
+      decide whether they should also keep running unmarked in the plain pytest -q step, or move
+      exclusively behind slow)"
+    - "Loosen _PROFILE_BUDGETS['demo']'s wall-clock budget with real CI-hardware margin, or move
+      test_default_profile_completes_within_its_stated_budget out of the CI-triggered demo-profile
+      invocation (its own design intent is manual `just budget` use)"
+    - "Restructure the CI step's shell so the skip-gate can still evaluate when pytest itself
+      fails (e.g. run pytest with || true before the grep, then check both exit code and grep
+      result explicitly)"
+  debug_session: ".planning/debug/ci-budget-marker-mismatch.md"
