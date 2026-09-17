@@ -17,6 +17,7 @@ flowchart LR
 
 [![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
+[![Status: Foundation](https://img.shields.io/badge/status-Foundation-orange)](#status)
 
 **Status:** Foundation
 
@@ -47,7 +48,7 @@ CI reproduces the same quality gate: `just ci` (ruff, import-linter, pytest). Se
 
 | Audience | Start here |
 |---|---|
-| Recruiter | This page — problem, status, architecture |
+| Recruiter | This page — problem, [Status](#status), [Architecture](#architecture) |
 | Hiring manager | [`docs/PROJECT_IDENTITY.md`](docs/PROJECT_IDENTITY.md) + [`docs/PRODUCT_CHARTER.md`](docs/PRODUCT_CHARTER.md) |
 | Technical reviewer | [`docs/ARCHITECTURAL_DIRECTION.md`](docs/ARCHITECTURAL_DIRECTION.md) + `src/nextmove/` |
 | Auditor | [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md) + [`docs/QUALITY_BAR.md`](docs/QUALITY_BAR.md) + ADRs |
