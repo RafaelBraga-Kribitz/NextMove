@@ -5,6 +5,7 @@
 [![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
 [![Status: Foundation](https://img.shields.io/badge/status-Foundation-orange)](#status)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 **Status:** Foundation
 
@@ -147,7 +148,7 @@ GitHub description: reproducible simulated e-commerce world (Phase 1). Last vali
 
 ## License
 
-No license file is present in this repository yet. Treat the public snapshot as source-available pending an explicit license.
+Apache-2.0. See [`LICENSE`](LICENSE).
 
 ## Author
 
