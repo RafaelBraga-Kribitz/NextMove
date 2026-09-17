@@ -1,0 +1,84 @@
+{
+  "output": "C:\\Users\\Benutzer1\\Dev\\portfolio-readme-work\\NextMove\\docs\\assets\\hero.png",
+  "width": 1600,
+  "height": 640,
+  "mode": "light",
+  "fonts": "Söhne from C:\\Users\\Benutzer1\\Dev\\braga-design-system-template\\public\\fonts",
+  "title_size": 112,
+  "descriptor_size": 36,
+  "attempts": 1,
+  "blocks": {
+    "kind": {
+      "bbox": [
+        72,
+        72,
+        376,
+        104
+      ],
+      "lines": [
+        "BRAGA · APPLICATION"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "status": {
+      "bbox": [
+        1368,
+        72,
+        1528,
+        104
+      ],
+      "lines": [
+        "FOUNDATION"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "facts": {
+      "bbox": [
+        72,
+        542,
+        1380,
+        570
+      ],
+      "lines": [
+        "RUNTIME  Python >=3.12,<3.13  ·  CI  GitHub Actions  ·  REPO  github.com/RafaelBraga-Kribitz/NextMove"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "title": {
+      "bbox": [
+        72,
+        160,
+        615,
+        274
+      ],
+      "lines": [
+        "NextMove"
+      ],
+      "font": "Sohne-Fett.otf"
+    },
+    "descriptor": {
+      "bbox": [
+        72,
+        302,
+        1150,
+        446
+      ],
+      "lines": [
+        "A headless behavioural decision engine for e-commerce",
+        "next-best-action. Phase 1: reproducible simulated world, ingest, and",
+        "features."
+      ],
+      "font": "Sohne-Buch.otf"
+    }
+  },
+  "guardrails": [
+    "safe-area",
+    "wrap-and-shrink",
+    "line-length",
+    "no-overlap",
+    "glyph-coverage-per-char",
+    "contrast>=4.5",
+    "pixel-scan"
+  ],
+  "validated": true
+}
