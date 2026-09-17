@@ -1,5 +1,15 @@
 # NextMove
 
+![NextMove — A headless behavioural decision engine for e-commerce next-best-action. Phase 1: reproducible simulated world, ingest, and features.](docs/assets/hero.png)
+
+[![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
+[![Status: Foundation](https://img.shields.io/badge/status-Foundation-orange)](#status)
+
+**Status:** Foundation
+
+E-commerce teams get scores, segments, and journeys — not a next action they can defend to finance. NextMove is a headless behavioral decision engine that turns customer events and business constraints into an explainable next-best-action, including the action of doing nothing.
+
 ```mermaid
 flowchart LR
     events[Raw events] --> features[Feature layer]
@@ -14,14 +24,6 @@ flowchart LR
     outcomes --> gateway[Evaluation and 3WD gateway]
     gateway --> features
 ```
-
-[![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
-[![Status: Foundation](https://img.shields.io/badge/status-Foundation-orange)](#status)
-
-**Status:** Foundation
-
-E-commerce teams get scores, segments, and journeys — not a next action they can defend to finance. NextMove is a headless behavioral decision engine that turns customer events and business constraints into an explainable next-best-action, including the action of doing nothing.
 
 ## Project status
 
@@ -151,6 +153,13 @@ No license file is present in this repository yet. Treat the public snapshot as 
 
 <table>
   <tr>
+    <td width="110">
+      <img
+        src="docs/assets/Author_MDS_Rafael_Braga-Kribitz_kroped.png"
+        alt="Rafael Braga-Kribitz"
+        width="96"
+      />
+    </td>
     <td>
       <strong>Rafael Braga-Kribitz</strong><br />
       Seiersberg-Pirka, Austria · Portfolio project, 2026<br />
