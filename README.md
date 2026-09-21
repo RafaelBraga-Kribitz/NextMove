@@ -12,7 +12,7 @@
 E-commerce teams get scores, segments, and journeys — not a next action they can defend to finance. NextMove is a headless behavioral decision engine that turns customer events and business constraints into an explainable next-best-action, including the action of doing nothing.
 
 ```mermaid
-flowchart LR
+flowchart TD
     events[Raw events] --> features[Feature layer]
     features --> behavior[Behavior analysis]
     behavior --> models[ML models]
