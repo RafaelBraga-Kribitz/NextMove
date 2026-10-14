@@ -11,8 +11,11 @@ import pytest
 
 ADR_DIR = Path(__file__).resolve().parents[2] / "docs" / "adr"
 
-# The ten open decisions ratified by this phase (DOC-01).
-ADR_NUMBERS = [f"{n:03d}" for n in range(1, 11)]
+# ADR-001..010 ratify OD-1..OD-10 (DOC-01); ADR-011 onward record later decisions. The count
+# is derived from disk so a new ADR is covered automatically, and the contiguity test below
+# keeps the numbering gap-free.
+ADR_COUNT = len(list(ADR_DIR.glob("[0-9][0-9][0-9]-*.md")))
+ADR_NUMBERS = [f"{n:03d}" for n in range(1, max(ADR_COUNT, 11) + 1)]
 
 REQUIRED_HEADINGS = ["## Status", "## Context", "## Decision", "## Consequences"]
 
@@ -107,7 +110,7 @@ def test_adr_filenames_sort_lexicographically_in_decision_order() -> None:
     directory listing shows the ADRs in decision order without any numeric-aware sort.
     """
     files = sorted(ADR_DIR.glob("[0-9][0-9][0-9]-*.md"))
-    assert len(files) == 10, f"expected 10 ADR files, found {len(files)}: {files}"
+    assert len(files) >= 11, f"expected at least 11 ADR files, found {len(files)}: {files}"
 
     lexicographic_order = [f.name for f in sorted(files, key=lambda p: p.name)]
     numeric_order = [f.name for f in sorted(files, key=lambda p: int(p.name.split("-", 1)[0]))]

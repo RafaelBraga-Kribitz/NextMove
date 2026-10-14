@@ -20,8 +20,8 @@ stages:
       nfiles: 10
     - path: src/nextmove/storage
       hash: md5
-      md5: 555277056f55c1b8a5bbdd78572592d2.dir
-      size: 48274
+      md5: 6b68b8d1bf6ceeda7d02ecf2c07e01b9.dir
+      size: 51052
       nfiles: 6
     outs:
     - path: data/ground_truth
@@ -31,12 +31,12 @@ stages:
       nfiles: 2
     - path: data/lineage/simulate.parquet
       hash: md5
-      md5: 38c28c0a3b213bcdb5ed59e11fd877f0
+      md5: ae135b6c7d60d02e4e80c9e75a40f5a4
       size: 3842
     - path: data/raw
       hash: md5
-      md5: 2b16b8ae6b65f9a695b3a2e310a67843.dir
-      size: 106497
+      md5: 8897459a6092af452bb4dd646681705e.dir
+      size: 106485
       nfiles: 4
   ingest:
     cmd: uv run python -m nextmove.ingest --profile tiny
@@ -47,8 +47,8 @@ stages:
       size: 718
     - path: data/raw
       hash: md5
-      md5: 2b16b8ae6b65f9a695b3a2e310a67843.dir
-      size: 106497
+      md5: 8897459a6092af452bb4dd646681705e.dir
+      size: 106485
       nfiles: 4
     - path: src/nextmove/config
       hash: md5
@@ -62,18 +62,18 @@ stages:
       nfiles: 7
     - path: src/nextmove/storage
       hash: md5
-      md5: 555277056f55c1b8a5bbdd78572592d2.dir
-      size: 48274
+      md5: 6b68b8d1bf6ceeda7d02ecf2c07e01b9.dir
+      size: 51052
       nfiles: 6
     outs:
     - path: data/canonical
       hash: md5
-      md5: 24d9d74d1f01d5f21e610e0d9da61384.dir
-      size: 83920
+      md5: 8c471182b07ff0de5e0e318f068605d8.dir
+      size: 83912
       nfiles: 2
     - path: data/lineage/ingest.parquet
       hash: md5
-      md5: d1af1468667b1963fe5e548c6a1b3b54
+      md5: e3e5b79054d908f3c8dcba76aef6aeb3
       size: 3992
   features:
     cmd: uv run python -m nextmove.features --profile tiny
@@ -84,8 +84,8 @@ stages:
       size: 1192
     - path: data/canonical
       hash: md5
-      md5: 24d9d74d1f01d5f21e610e0d9da61384.dir
-      size: 83920
+      md5: 8c471182b07ff0de5e0e318f068605d8.dir
+      size: 83912
       nfiles: 2
     - path: src/nextmove/config
       hash: md5
@@ -99,16 +99,16 @@ stages:
       nfiles: 5
     - path: src/nextmove/storage
       hash: md5
-      md5: 555277056f55c1b8a5bbdd78572592d2.dir
-      size: 48274
+      md5: 6b68b8d1bf6ceeda7d02ecf2c07e01b9.dir
+      size: 51052
       nfiles: 6
     outs:
     - path: data/features
       hash: md5
-      md5: 36b0bed859360e56c12ef72cbac81bc1.dir
-      size: 10911
+      md5: 5acaec2b6914227b9b5bbcf574bc0679.dir
+      size: 10899
       nfiles: 1
     - path: data/lineage/features.parquet
       hash: md5
-      md5: e2a58a4c53b122a71500841b30e76814
-      size: 3915
+      md5: d582b5277ae8ee189dbb55e0cb0ad84c
+      size: 3918
