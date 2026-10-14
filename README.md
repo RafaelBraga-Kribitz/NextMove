@@ -1,11 +1,17 @@
 # NextMove
 
-**A next-best-action engine for e-commerce CRM that knows when to do nothing.**
+![NextMove — a headless behavioural decision engine for e-commerce next-best-action](docs/assets/hero.png)
 
 [![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
-[![Status: complete, evaluated in simulation](https://img.shields.io/badge/status-complete%20(simulation)-brightgreen)](#status)
+[![Status: In development](https://img.shields.io/badge/status-In%20development-yellow)](#status)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
+**Status:** In development · the scoped release (ADR-011) is built and evaluated in simulation; final release checks are open
+
+A next-best-action engine for e-commerce CRM that knows when to do nothing.
+
+## Decision summary
 
 **The decision:** in simulation, a CRM team running this simulated retailer should
 **drop the weekly rules-based contact playbook and blanket discounts in favour of
@@ -34,8 +40,6 @@ statistics (calibration, bootstrap intervals, uplift error) · experimentation (
 A/B/n test, three-way decision gateway).
 Domain: e-commerce, customer / CRM analytics, segmentation, KPIs (Kennzahlen), purchase-propensity
 forecasting.
-
----
 
 ## Question
 
@@ -175,6 +179,18 @@ just coverage             # AC-12 coverage gates
 CI runs the same checks plus the miniature `ci` profile end to end. Operations:
 [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
 
+## Stack
+
+| Layer | Tools |
+|---|---|
+| Language and environment | Python 3.12, uv, just |
+| Data and SQL | DuckDB (star-schema mart, SQL tests), Parquet / pyarrow, pandas, pandera |
+| Modeling | scikit-learn (logistic regression), LightGBM (gradient boosting, TreeSHAP), MLflow tracking |
+| Pipeline and lineage | DVC, content-hash lineage, schema-validated YAML config (pydantic) |
+| Serving and demo | FastAPI, uvicorn, OpenAPI |
+| Reporting | Power BI build kit (DAX, theme, layout), matplotlib |
+| Quality | pytest, hypothesis, ruff, import-linter, GitHub Actions |
+
 ## Repository structure
 
 | Path | Responsibility |
@@ -189,10 +205,13 @@ CI runs the same checks plus the miniature `ci` profile end to end. Operations:
 
 ## Status
 
-**Complete for the scoped release (ADR-011), evaluated in simulation only.** Out of scope and
-listed in [`docs/MILESTONES.md`](docs/MILESTONES.md#later-explicitly-out-of-scope-for-this-release-per-adr-011):
-dynamic 3WD thresholds, dedicated uplift learners, public-dataset validation, contextual
-bandits.
+**Status:** In development · 2026-10-14 · milestones M-A to M-F in [`docs/STATUS_LOG.md`](docs/STATUS_LOG.md)
+
+The scoped release (ADR-011) is built and evaluated **in simulation only**. What does not exist
+yet: results on real customer data, dynamic 3WD thresholds, dedicated uplift learners,
+public-dataset validation and contextual bandits (listed in
+[`docs/MILESTONES.md`](docs/MILESTONES.md#later-explicitly-out-of-scope-for-this-release-per-adr-011)),
+and the Power BI `.pbix` file, which is built by hand from the kit.
 
 ## License
 
