@@ -40,6 +40,9 @@ class Zone(StrEnum):
     MODELS = "models"
     EVALUATION = "evaluation"
     MART = "mart"
+    #: Operator input (UC1 overrides): append-only, never a DVC out, so a pipeline rerun can
+    #: never erase a human decision.
+    OVERRIDES = "overrides"
 
 
 class Stage(StrEnum):
@@ -52,6 +55,8 @@ class Stage(StrEnum):
     FEATURES = "features"
     EXPERIMENT = "experiment"
     TRAIN = "train"
+    EVALUATE = "evaluate"
+    MART = "mart"
 
 
 def resolve_table_path(name: str, zone: Zone, root: Path | None = None) -> Path:

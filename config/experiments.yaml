@@ -1,2 +1,17 @@
-# Populated by Phase 3: 3WD thresholds (MDE, indifference margin, delay budget). Empty and
-# schema-locked (ExperimentsConfig, extra="forbid") until then.
+# 3WD gateway thresholds (ADR-008: static in MVP, interface ready for dynamic thresholds).
+# Units follow the primary metric: incremental profit per decision, in cents, of a candidate
+# policy versus its control over the same customers, days and random draws.
+experiments:
+  primary_metric: profit_per_decision_cents
+  # Minimum detectable (and worthwhile) effect: Accept needs the CI above zero and the point
+  # estimate at or above this.
+  mde: 0.5
+  # Equivalence band: a CI entirely inside [-margin, +margin] is a practical tie -> Reject
+  # (keep the control; the change is not worth its complexity).
+  indifference_margin: 0.25
+  # Guardrails: a candidate may not lower these by more than `max_drop` (absolute).
+  guardrails:
+    - metric: conversion_rate
+      max_drop: 0.002
+  # A Delay older than this many days escalates to `needs_human_review` (AC-9).
+  delay_budget_days: 28

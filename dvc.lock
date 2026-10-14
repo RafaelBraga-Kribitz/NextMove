@@ -1,17 +1,17 @@
 schema: '2.0'
 stages:
   simulate:
-    cmd: uv run python -m nextmove.simulator --profile tiny
+    cmd: uv run python -m nextmove.simulator --profile demo
     deps:
     - path: config
       hash: md5
-      md5: a28174aa6d7085438b0d2d374fa714fe.dir
-      size: 8682
-      nfiles: 12
+      md5: 5eacc084a50f211d4f20fe3fbf622c7f.dir
+      size: 16787
+      nfiles: 15
     - path: src/nextmove/config
       hash: md5
-      md5: bfd1dfa4e5fbf59f0e99dd1bcbc7e01d.dir
-      size: 23068
+      md5: ca702274d996034f33d4454019daca18.dir
+      size: 30761
       nfiles: 3
     - path: src/nextmove/simulator
       hash: md5
@@ -20,26 +20,26 @@ stages:
       nfiles: 10
     - path: src/nextmove/storage
       hash: md5
-      md5: 6b68b8d1bf6ceeda7d02ecf2c07e01b9.dir
-      size: 51052
+      md5: 36c1be5f2cb8ae25eb66df8614e23790.dir
+      size: 54766
       nfiles: 6
     outs:
     - path: data/ground_truth
       hash: md5
-      md5: 1ec66b549c088d57d11170e5516a0b45.dir
-      size: 17511
+      md5: 8de3bcaef3c80a990dea40b6ec20a360.dir
+      size: 1583123
       nfiles: 2
     - path: data/lineage/simulate.parquet
       hash: md5
-      md5: ae135b6c7d60d02e4e80c9e75a40f5a4
-      size: 3842
+      md5: 601a3a896936e293b6929ed7d9ebb73e
+      size: 3847
     - path: data/raw
       hash: md5
-      md5: 8897459a6092af452bb4dd646681705e.dir
-      size: 106485
+      md5: ae4c18d4c092677dbc5b1e4c64516031.dir
+      size: 31433723
       nfiles: 4
   ingest:
-    cmd: uv run python -m nextmove.ingest --profile tiny
+    cmd: uv run python -m nextmove.ingest --profile demo
     deps:
     - path: config/data_quality.yaml
       hash: md5
@@ -47,13 +47,13 @@ stages:
       size: 718
     - path: data/raw
       hash: md5
-      md5: 8897459a6092af452bb4dd646681705e.dir
-      size: 106485
+      md5: ae4c18d4c092677dbc5b1e4c64516031.dir
+      size: 31433723
       nfiles: 4
     - path: src/nextmove/config
       hash: md5
-      md5: bfd1dfa4e5fbf59f0e99dd1bcbc7e01d.dir
-      size: 23068
+      md5: ca702274d996034f33d4454019daca18.dir
+      size: 30761
       nfiles: 3
     - path: src/nextmove/ingest
       hash: md5
@@ -62,19 +62,19 @@ stages:
       nfiles: 7
     - path: src/nextmove/storage
       hash: md5
-      md5: 6b68b8d1bf6ceeda7d02ecf2c07e01b9.dir
-      size: 51052
+      md5: 36c1be5f2cb8ae25eb66df8614e23790.dir
+      size: 54766
       nfiles: 6
     outs:
     - path: data/canonical
       hash: md5
-      md5: 8c471182b07ff0de5e0e318f068605d8.dir
-      size: 83912
+      md5: a08c841edd813ec3ec2302b392b7488c.dir
+      size: 31267392
       nfiles: 2
     - path: data/lineage/ingest.parquet
       hash: md5
-      md5: e3e5b79054d908f3c8dcba76aef6aeb3
-      size: 3992
+      md5: 4084772d1ad1336869a411c0042757b3
+      size: 4003
   features:
     cmd: uv run python -m nextmove.features --profile tiny
     deps:

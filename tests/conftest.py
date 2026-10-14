@@ -23,7 +23,8 @@ def repo_root() -> Path:
 
 @pytest.fixture(scope="session")
 def tiny_pipeline(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """The tiny profile run through simulate -> ingest -> features -> experiment -> train, once
+    """The tiny profile run through simulate -> ingest -> features -> experiment -> train ->
+    evaluate (reports under `<root>/reports`), once
     per session, into a private output root. Decision-layer tests build on it."""
     import subprocess
     import sys
@@ -35,6 +36,8 @@ def tiny_pipeline(tmp_path_factory: pytest.TempPathFactory) -> Path:
         ["nextmove.features"],
         ["nextmove.evaluate", "experiment"],
         ["nextmove.models"],
+        ["nextmove.evaluate", "evaluate", "--reports", str(root / "reports")],
+        ["nextmove.mart", "--export", str(root / "reports" / "mart")],
     ]
     for command in commands:
         subprocess.run(

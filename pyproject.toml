@@ -16,6 +16,7 @@ dependencies = [
     "fastapi>=0.120,<1",
     "uvicorn>=0.38,<1",
     "matplotlib>=3.10,<4",
+    "python-multipart>=0.0.20,<1",
 ]
 
 [dependency-groups]
@@ -73,6 +74,7 @@ source_modules = [
     "nextmove.decisions",
     "nextmove.policies",
     "nextmove.features",
+    "nextmove.mart",
 ]
 forbidden_modules = ["nextmove.simulator"]
 
@@ -98,6 +100,7 @@ source_modules = [
     "nextmove.evaluate",
     "nextmove.api",
     "nextmove.config",
+    "nextmove.mart",
 ]
 forbidden_modules = ["pyarrow", "duckdb"]
 # import-linter's "forbidden" contract type walks the *transitive* import graph, so without

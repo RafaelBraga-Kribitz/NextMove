@@ -556,9 +556,25 @@ class McdaConfig(StrictModel):
     segmentation: SegmentationConfig
 
 
+class GuardrailConfig(StrictModel):
+    metric: str = Field(min_length=1)
+    max_drop: float = Field(ge=0.0)
+
+
 class ExperimentsConfig(StrictModel):
-    """Populated by Phase 3: 3WD thresholds (MDE, indifference margin, delay budget).
-    Empty and schema-locked until then."""
+    """Static 3WD thresholds (ADR-008): MDE, indifference margin, guardrails, delay budget."""
+
+    primary_metric: str = Field(min_length=1)
+    mde: float = Field(gt=0.0)
+    indifference_margin: float = Field(gt=0.0)
+    guardrails: list[GuardrailConfig] = Field(default_factory=list)
+    delay_budget_days: int = Field(ge=1)
+
+    @model_validator(mode="after")
+    def _margin_below_mde(self) -> "ExperimentsConfig":
+        if self.indifference_margin >= self.mde:
+            raise ValueError("indifference_margin must be smaller than mde")
+        return self
 
 
 # ---------------------------------------------------------------------------------------
@@ -581,7 +597,7 @@ class Config(StrictModel):
     constraints: ConstraintsConfig
     actions: ActionsConfig
     mcda: McdaConfig
-    experiments: ExperimentsConfig = Field(default_factory=ExperimentsConfig)
+    experiments: ExperimentsConfig
     autonomy: AutonomyConfig
     policies: PoliciesConfig
     evaluation: EvaluationConfig

@@ -50,6 +50,7 @@ class RolloutSpec:
     record_features: Callable[[DecisionContext], list[float]] | None = None
     feature_names: Sequence[str] = ()
     customers: Sequence[str] | None = None
+    hindsight: bool = False
 
 
 def rollout(
@@ -123,6 +124,19 @@ def rollout(
                 "expected_profit_cents": p_action * unit_profit - candidate.cost_cents,
                 "expected_profit_none_cents": p_none * unit_profit_none,
             }
+            if spec.hindsight:
+                # Hindsight reference: the survivor with the highest ground-truth expected profit.
+                # Used for regret and for the confidence-calibration check; never shown to policies.
+                best_id, best_profit = candidate.id, p_action * unit_profit - candidate.cost_cents
+                for other in outcome.survivors:
+                    p_other = oracle.p_convert(cid, day, other.archetype, other.params, prior)
+                    other_profit = (
+                        p_other * value * (margin - other.discount_bps / 10_000) - other.cost_cents
+                    )
+                    if other_profit > best_profit + 1e-12:
+                        best_id, best_profit = other.id, other_profit
+                record["oracle_best_candidate"] = best_id
+                record["regret_cents"] = best_profit - record["expected_profit_cents"]
             record.update(choice.extra)
             rows.append(record)
             if spec.record_features is not None:

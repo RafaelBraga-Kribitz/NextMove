@@ -99,6 +99,9 @@ class OutcomeOracle:
         }
         self._seasonal_cache: dict[tuple[int, str], float] = {}
 
+    def primary_category(self, customer_id: str) -> str:
+        return self._customers[customer_id].category
+
     @property
     def n_customers(self) -> int:
         return self.config.n_customers

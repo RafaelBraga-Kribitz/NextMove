@@ -1,0 +1,848 @@
+{
+  "components": {
+    "schemas": {
+      "ActionChoice": {
+        "additionalProperties": false,
+        "description": "The chosen action: its catalog archetype, the concrete candidate id, and its params.",
+        "properties": {
+          "candidate_id": {
+            "description": "Concrete parameterized candidate.",
+            "minLength": 1,
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "title": "Params",
+            "type": "object"
+          },
+          "type": {
+            "description": "Action archetype from the action catalog.",
+            "minLength": 1,
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "candidate_id"
+        ],
+        "title": "ActionChoice",
+        "type": "object"
+      },
+      "Attribution": {
+        "additionalProperties": false,
+        "description": "One feature's signed contribution to the chosen action's predicted response.",
+        "properties": {
+          "feature": {
+            "minLength": 1,
+            "title": "Feature",
+            "type": "string"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "weight"
+        ],
+        "title": "Attribution",
+        "type": "object"
+      },
+      "CandidateScore": {
+        "additionalProperties": false,
+        "description": "The score breakdown for one surviving candidate.",
+        "properties": {
+          "cost_cents": {
+            "title": "Cost Cents",
+            "type": "number"
+          },
+          "risk_penalty_cents": {
+            "title": "Risk Penalty Cents",
+            "type": "number"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "uplift": {
+            "title": "Uplift",
+            "type": "number"
+          },
+          "value_cents": {
+            "title": "Value Cents",
+            "type": "number"
+          }
+        },
+        "required": [
+          "score",
+          "uplift",
+          "value_cents",
+          "cost_cents",
+          "risk_penalty_cents"
+        ],
+        "title": "CandidateScore",
+        "type": "object"
+      },
+      "Decision": {
+        "additionalProperties": false,
+        "description": "One next-best-action decision for one customer at one point in time.",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ActionChoice"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "constraints_considered": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Constraints Considered",
+            "type": "array"
+          },
+          "contract_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "customer_id": {
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "decision_id": {
+            "minLength": 1,
+            "title": "Decision Id",
+            "type": "string"
+          },
+          "expected_outcome": {
+            "$ref": "#/components/schemas/ExpectedOutcome"
+          },
+          "needs_human_review": {
+            "default": false,
+            "title": "Needs Human Review",
+            "type": "boolean"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/PolicyInfo"
+          },
+          "reasoning": {
+            "minLength": 1,
+            "title": "Reasoning",
+            "type": "string"
+          },
+          "reasoning_trace": {
+            "$ref": "#/components/schemas/ReasoningTrace"
+          },
+          "review_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Reason"
+          },
+          "unavailable": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Field path -> reason, for every nullable field that is null.",
+            "title": "Unavailable",
+            "type": "object"
+          }
+        },
+        "required": [
+          "decision_id",
+          "customer_id",
+          "as_of",
+          "action",
+          "expected_outcome",
+          "confidence",
+          "reasoning",
+          "reasoning_trace",
+          "constraints_considered",
+          "policy"
+        ],
+        "title": "Decision",
+        "type": "object"
+      },
+      "DecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision date; defaults to the first test-window day.",
+            "title": "As Of"
+          },
+          "customer_id": {
+            "examples": [
+              "42"
+            ],
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer_id"
+        ],
+        "title": "DecisionRequest",
+        "type": "object"
+      },
+      "ExpectedOutcome": {
+        "additionalProperties": false,
+        "description": "Expected incremental effect of the chosen action versus doing nothing.",
+        "properties": {
+          "estimate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Point estimate; null only with a stated reason.",
+            "title": "Estimate"
+          },
+          "expected_profit_cents": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Expected incremental profit in cents versus `none`.",
+            "title": "Expected Profit Cents"
+          },
+          "horizon_days": {
+            "exclusiveMinimum": 0.0,
+            "title": "Horizon Days",
+            "type": "integer"
+          },
+          "interval": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Uncertainty interval [low, high]; null only with a stated reason.",
+            "title": "Interval"
+          },
+          "metric": {
+            "const": "conversion_uplift",
+            "default": "conversion_uplift",
+            "title": "Metric",
+            "type": "string"
+          }
+        },
+        "required": [
+          "estimate",
+          "interval",
+          "horizon_days"
+        ],
+        "title": "ExpectedOutcome",
+        "type": "object"
+      },
+      "FilteredCandidate": {
+        "additionalProperties": false,
+        "description": "A candidate removed by a hard constraint, and why.",
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "title": "Action",
+            "type": "string"
+          },
+          "detail": {
+            "minLength": 1,
+            "title": "Detail",
+            "type": "string"
+          },
+          "rule": {
+            "minLength": 1,
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "rule",
+          "detail"
+        ],
+        "title": "FilteredCandidate",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "OverrideRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "customer_id": {
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "decision_id": {
+            "minLength": 1,
+            "title": "Decision Id",
+            "type": "string"
+          },
+          "operator": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Operator",
+            "type": "string"
+          },
+          "override_candidate": {
+            "examples": [
+              "email_delayed"
+            ],
+            "minLength": 1,
+            "title": "Override Candidate",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision_id",
+          "customer_id",
+          "as_of",
+          "override_candidate",
+          "reason",
+          "operator"
+        ],
+        "title": "OverrideRequest",
+        "type": "object"
+      },
+      "PolicyInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "config_hash": {
+            "minLength": 1,
+            "title": "Config Hash",
+            "type": "string"
+          },
+          "model_versions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Model Versions",
+            "type": "object"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "config_hash"
+        ],
+        "title": "PolicyInfo",
+        "type": "object"
+      },
+      "ReasoningTrace": {
+        "additionalProperties": false,
+        "description": "Structured, replayable trace behind `reasoning` (AC-4).",
+        "properties": {
+          "candidates_considered": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "title": "Candidates Considered",
+            "type": "array"
+          },
+          "filtered": {
+            "items": {
+              "$ref": "#/components/schemas/FilteredCandidate"
+            },
+            "title": "Filtered",
+            "type": "array"
+          },
+          "fired_rules": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fired Rules",
+            "type": "array"
+          },
+          "model_attributions": {
+            "items": {
+              "$ref": "#/components/schemas/Attribution"
+            },
+            "title": "Model Attributions",
+            "type": "array"
+          },
+          "runner_up": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunnerUp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "runner_up_unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runner Up Unavailable Reason"
+          },
+          "scores": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CandidateScore"
+            },
+            "title": "Scores",
+            "type": "object"
+          }
+        },
+        "required": [
+          "candidates_considered",
+          "scores",
+          "runner_up"
+        ],
+        "title": "ReasoningTrace",
+        "type": "object"
+      },
+      "RunnerUp": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "title": "Action",
+            "type": "string"
+          },
+          "score_gap": {
+            "minimum": 0.0,
+            "title": "Score Gap",
+            "type": "number"
+          }
+        },
+        "required": [
+          "action",
+          "score_gap"
+        ],
+        "title": "RunnerUp",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Next-best-action decisions with reasons, constraints and overrides. Serves a seeded simulated retailer only (ADR-004); no real customer data.",
+    "title": "NextMove decision API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/customers/{customer_id}": {
+      "get": {
+        "operationId": "customer_v1_customers__customer_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Customer V1 Customers  Customer Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Customer",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customers/{customer_id}/options": {
+      "get": {
+        "operationId": "options_v1_customers__customer_id__options_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Options V1 Customers  Customer Id  Options Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Options",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/decisions": {
+      "post": {
+        "operationId": "decide_v1_decisions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Decision"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide",
+        "tags": [
+          "decisions"
+        ]
+      }
+    },
+    "/v1/evaluation/overrides": {
+      "get": {
+        "operationId": "override_evaluation_v1_evaluation_overrides_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Override Evaluation V1 Evaluation Overrides Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Override Evaluation",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/v1/evaluation/policies": {
+      "get": {
+        "operationId": "policies_v1_evaluation_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Policies V1 Evaluation Policies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Policies",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/v1/overrides": {
+      "post": {
+        "operationId": "override_v1_overrides_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverrideRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Override V1 Overrides Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Override",
+        "tags": [
+          "overrides"
+        ]
+      }
+    }
+  }
+}

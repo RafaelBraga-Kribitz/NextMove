@@ -75,7 +75,9 @@ class ContextStore:
         cutoff = (
             self.horizon_days if business_reference_cutoff is None else business_reference_cutoff
         )
-        self._grid = self._load_grid(days)
+        self._grid: dict[int, pd.DataFrame] = {}
+        if days is not None:
+            self._load_grid(days)
         self._load_events()
         self._stock = self._load_stock()
         self._reference = self._load_reference(cutoff)
@@ -85,28 +87,35 @@ class ContextStore:
     def _path(self, name: str, zone: Zone) -> Path:
         return resolve_table_path(name, zone, self.root)
 
-    def _load_grid(self, days: Iterable[int] | None) -> pd.DataFrame:
-        day_filter = ""
-        if days is not None:
-            wanted = sorted({int(d) for d in days})
-            if not wanted:
-                wanted = [-1]
-            day_filter = (
-                "WHERE date_diff('day', DATE '" + self.start.isoformat() + "', "
-                "CAST(as_of_ts AS DATE)) IN (" + ",".join(str(d) for d in wanted) + ")"
-            )
+    def _load_grid(self, days: Iterable[int]) -> None:
+        """Load feature-grid rows for `days` into the per-day cache (missing days load lazily
+        on first use, so the API can decide at any `as_of`)."""
+        wanted = sorted({int(d) for d in days} - set(self._grid))
+        if not wanted:
+            return
         sql = (
             "SELECT customer_id, date_diff('day', DATE '"
             + self.start.isoformat()
             + "', CAST(as_of_ts AS DATE)) AS day, "
             + ", ".join(_NUMERIC_GRID_COLUMNS)
             + ", session_dwell_counts_json, category_affinity_json, micro_conversion_counts_json "
-            "FROM grid " + day_filter + " ORDER BY customer_id, day"
+            "FROM grid WHERE date_diff('day', DATE '"
+            + self.start.isoformat()
+            + "', CAST(as_of_ts AS DATE)) IN ("
+            + ",".join(str(d) for d in wanted)
+            + ") ORDER BY day, customer_id"
         )
         table = query(sql, root=self.root, grid=self._path("feature_grid", Zone.FEATURES))
         frame = table.to_pandas()
         frame["day"] = frame["day"].astype(int)
-        return frame.set_index(["customer_id", "day"]).sort_index()
+        for day in wanted:
+            part = frame[frame["day"] == day].drop(columns=["day"])
+            self._grid[day] = part.set_index("customer_id")
+
+    def _day_frame(self, day: int) -> pd.DataFrame:
+        if day not in self._grid:
+            self._load_grid([day])
+        return self._grid[day]
 
     def _load_events(self) -> None:
         events = self._path("events", Zone.CANONICAL)
@@ -206,7 +215,7 @@ class ContextStore:
         return [cid for cid in self.customer_ids() if self._first_day[cid] < day and cid in rows]
 
     def has_row(self, customer_id: str, day: int) -> bool:
-        return (customer_id, day) in self._grid.index
+        return customer_id in self._day_frame(day).index
 
     def exposure_days_before(self, customer_id: str, day: int) -> list[int]:
         days = self._exposure_days.get(customer_id, [])
@@ -224,11 +233,7 @@ class ContextStore:
 
     def day_rows(self, day: int) -> dict[str, dict]:
         """Every feature-grid row on `day`, keyed by customer id."""
-        try:
-            frame = self._grid.xs(day, level="day")
-        except KeyError:
-            return {}
-        return frame.to_dict(orient="index")
+        return self._day_frame(day).to_dict(orient="index")
 
     def context(
         self,
@@ -244,7 +249,10 @@ class ContextStore:
         an operator; they join the business's own historical campaign exposures.
         """
         if row is None:
-            row = self._grid.loc[(customer_id, day)].to_dict()
+            frame = self._day_frame(day)
+            if customer_id not in frame.index:
+                raise LookupError(f"no feature row for customer {customer_id!r} on day {day}")
+            row = frame.loc[customer_id].to_dict()
         exposures = self.exposure_days_before(customer_id, day)
         contacts = sorted([*exposures, *(d for d in extra_contact_days if d < day)], reverse=True)
         affinity = json.loads(row["category_affinity_json"] or "{}")

@@ -28,7 +28,8 @@ def _golden_lines() -> list[str]:
     )
     lines = []
     for policy in (ev, RulesOnlyPolicy(CONFIG.config.policies.baselines)):
-        engine = engine_for(policy, min_confidence=0.5)
+        # A pinned hash: the golden file tracks engine behaviour, not unrelated config edits.
+        engine = engine_for(policy, min_confidence=0.5, config_hash="golden-config")
         for index, (stock, contacts, cart) in enumerate(
             [(150, (), 0.0), (150, (3,), 2.0), (4, (), 2.0), (150, (0, 1), 0.0), (60, (9,), 1.0)]
         ):

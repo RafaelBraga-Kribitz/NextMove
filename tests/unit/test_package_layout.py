@@ -26,7 +26,10 @@ ENG_01_PACKAGES = {
 # Cross-cutting infrastructure packages that sit below all eleven in the import graph.
 INFRASTRUCTURE_PACKAGES = {"config", "storage"}
 
-ALL_EXPECTED_PACKAGES = ENG_01_PACKAGES | INFRASTRUCTURE_PACKAGES
+# ADR-011: the SQL-first analytics layer (DuckDB mart) is a reporting package on top.
+ANALYTICS_PACKAGES = {"mart"}
+
+ALL_EXPECTED_PACKAGES = ENG_01_PACKAGES | INFRASTRUCTURE_PACKAGES | ANALYTICS_PACKAGES
 
 
 def _discovered_package_dirs(repo_root: Path) -> set[str]:
@@ -38,15 +41,15 @@ def _discovered_package_dirs(repo_root: Path) -> set[str]:
     }
 
 
-def test_package_inventory_is_exactly_thirteen(repo_root: Path) -> None:
+def test_package_inventory_is_exactly_fourteen(repo_root: Path) -> None:
     """The set of package directories under src/nextmove/ equals exactly the eleven
-    ENG-01 packages plus the two infrastructure packages — thirteen total.
+    ENG-01 packages, the two infrastructure packages and the ADR-011 mart — fourteen total.
 
     Compared with `==` (not a subset check) so both an addition and a removal fail.
     """
     discovered = _discovered_package_dirs(repo_root)
     assert discovered == ALL_EXPECTED_PACKAGES
-    assert len(ALL_EXPECTED_PACKAGES) == 13
+    assert len(ALL_EXPECTED_PACKAGES) == 14
 
 
 def test_every_package_is_importable() -> None:

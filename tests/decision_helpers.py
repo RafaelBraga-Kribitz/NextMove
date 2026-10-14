@@ -95,13 +95,13 @@ class StubResponseModel:
         ]
 
 
-def engine_for(policy, config=CONFIG, min_confidence=None) -> DecisionEngine:
+def engine_for(policy, config=CONFIG, min_confidence=None, config_hash=None) -> DecisionEngine:
     cfg = config.config
     return DecisionEngine(
         policy,
         RuleSet.from_config(cfg.constraints),
         build_providers(cfg.actions, ["catalog"]),
         cfg.actions,
-        config.config_hash,
+        config_hash or config.config_hash,
         min_confidence,
     )

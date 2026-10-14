@@ -12,3 +12,6 @@ mlruns/
 mlflow.db
 data/
 mlruns.db
+reports/ci/
+reports/tiny/
+reports/default/
