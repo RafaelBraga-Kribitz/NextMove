@@ -61,7 +61,7 @@ commit that completes it.
   customers; observable features carry weak signal (test AUC ≈ 0.51–0.53). Reported as is.
 - **2026-10-14** — B3/D1–D4: evaluate stage (validation-window model selection, test-window
   replay of seven policies incl. a hindsight oracle, bootstrap CIs, uplift error, 3WD verdicts,
-  overrides, report + model cards). Result on `demo` (run `demo-d3a9c2aa72`, simulation only):
+  overrides, report + model cards). Result on `demo` (run `demo-f8fb25c032`, simulation only):
   engine ≈ do-nothing, beats rules-only by €2,909 [€2,785, €3,042]; gateway Accept vs
   rules-only (needs sign-off), Reject (in-margin) vs do-nothing; oracle ceiling +€44.
 - **2026-10-14** — E1/E2/E3: FastAPI app + OpenAPI export, demo pages, DuckDB star-schema mart

@@ -23,7 +23,7 @@ always-discount saw redeemed went to customers who would have bought anyway.
 
 **The number:** **+€2,909** expected profit for the decision engine versus the rules-only
 playbook (95% CI €2,785 to €3,042), 1,983 simulated customers, 20 weekly decision rounds,
-run `demo-d3a9c2aa72`. **In simulation only** (ADR-004): no real customers, revenue or
+run `demo-f8fb25c032`. **In simulation only** (ADR-004): no real customers, revenue or
 production use.
 
 ```bash
@@ -97,7 +97,7 @@ flowchart LR
    `dim_action`, `dim_date`, `dim_policy`) with SQL tests, KPI, retention-cohort and
    data-quality tables, exported for Power BI ([`reporting/powerbi/`](reporting/powerbi/README.md)).
 
-## Result (simulated, run `demo-d3a9c2aa72`)
+## Result (simulated, run `demo-f8fb25c032`)
 
 | Policy | Expected profit vs. doing nothing [95% CI] | Contact rate | Wasted-discount share |
 |---|---|---:|---:|

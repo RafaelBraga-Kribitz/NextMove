@@ -51,7 +51,7 @@ table { border-collapse:collapse; width:100%; font-size:14px; }
 th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line);
   vertical-align:top; }
 th { color:var(--ink2); font-weight:500; }
-td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .ok { color:var(--good); } .no { color:var(--ink2); }
 form.inline { display:grid; gap:8px; grid-template-columns:1fr; max-width:520px; }
 select, input, button { font:inherit; padding:7px 9px; border:1px solid var(--line);
@@ -78,7 +78,19 @@ from the seeded NextMove simulator (ADR-004); none describes real people or reve
 
 
 def _eur(cents: float | None) -> str:
-    return "—" if cents is None else f"€{cents / 100:+.2f}"
+    if cents is None:
+        return "—"
+    value = round(cents / 100, 2)
+    if value == 0:
+        return "€0.00"
+    return f"−€{abs(value):,.2f}" if value < 0 else f"+€{value:,.2f}"
+
+
+def _eur_whole(value: float) -> str:
+    rounded = round(value)
+    if rounded == 0:
+        return "€0"
+    return f"−€{abs(rounded):,}" if rounded < 0 else f"€{rounded:,}"
 
 
 def register_demo(app: FastAPI, service) -> None:
@@ -249,9 +261,10 @@ Overrides are logged and priced on the evaluation page.</p>
         )
         overrides = (
             f"<p>{live['count']} override(s); net expected-profit effect versus the engine: "
-            f"<b>€{live['net_effect_eur']:+.2f}</b> (simulation).</p>"
+            f"<b>{_eur(live['net_effect_eur'] * 100)}</b> (simulation).</p>"
             "<table><tr><th>Customer</th><th>Change</th><th>Reason</th><th>By</th>"
-            "<th class='num'>Engine choice</th><th class='num'>Override</th>"
+            "<th class='num'>Engine choice (exp. profit)</th>"
+            "<th class='num'>Override (exp. profit)</th>"
             f"<th class='num'>Effect</th></tr>{rows}</table>"
             if live["count"]
             else "<p>No overrides logged yet. Open a customer and override a decision.</p>"
@@ -261,9 +274,9 @@ Overrides are logged and priced on the evaluation page.</p>
             f"<tr><td>{escape(p['label'])}{' (ML policy)' if p['is_ml_policy'] else ''}</td>"
             f"<td class='num'>{p['restraint_rate']:.0%}</td>"
             f"<td class='num'>{p['discount_rate']:.0%}</td>"
-            f"<td class='num'>€{p['vs_do_nothing_eur']:,.0f} "
-            f"[€{p['vs_do_nothing_ci_low_eur']:,.0f}, "
-            f"€{p['vs_do_nothing_ci_high_eur']:,.0f}]</td>"
+            f"<td class='num'>{_eur_whole(p['vs_do_nothing_eur'])} "
+            f"[{_eur_whole(p['vs_do_nothing_ci_low_eur'])}, "
+            f"{_eur_whole(p['vs_do_nothing_ci_high_eur'])}]</td>"
             f"<td class='num'>{p['wasted_discount_share']:.0%}</td></tr>"
             for p in policies
         )

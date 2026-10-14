@@ -238,3 +238,160 @@ stages:
       md5: fa3cc4792707e6b55c1760d7f7d516c9.dir
       size: 3634248
       nfiles: 6
+  evaluate:
+    cmd: uv run python -m nextmove.evaluate evaluate --profile demo
+    deps:
+    - path: config
+      hash: md5
+      md5: 5eacc084a50f211d4f20fe3fbf622c7f.dir
+      size: 16787
+      nfiles: 15
+    - path: data/canonical
+      hash: md5
+      md5: a08c841edd813ec3ec2302b392b7488c.dir
+      size: 31267392
+      nfiles: 2
+    - path: data/experiment
+      hash: md5
+      md5: c9d1b4dfbcdf526edec08d464170d511.dir
+      size: 5042528
+      nfiles: 1
+    - path: data/features
+      hash: md5
+      md5: ff49dd99036f94a61aa34f910784c55e.dir
+      size: 2106767
+      nfiles: 1
+    - path: data/ground_truth
+      hash: md5
+      md5: 8de3bcaef3c80a990dea40b6ec20a360.dir
+      size: 1583123
+      nfiles: 2
+    - path: data/models
+      hash: md5
+      md5: fa3cc4792707e6b55c1760d7f7d516c9.dir
+      size: 3634248
+      nfiles: 6
+    - path: data/raw
+      hash: md5
+      md5: ae4c18d4c092677dbc5b1e4c64516031.dir
+      size: 31433723
+      nfiles: 4
+    - path: src/nextmove/config
+      hash: md5
+      md5: ca702274d996034f33d4454019daca18.dir
+      size: 30761
+      nfiles: 3
+    - path: src/nextmove/decisions
+      hash: md5
+      md5: b4dae271fc74cff980ee521a824daf6a.dir
+      size: 43226
+      nfiles: 6
+    - path: src/nextmove/evaluate
+      hash: md5
+      md5: f0e370ba55d9980b9a1d92a4cced58d7.dir
+      size: 81025
+      nfiles: 9
+    - path: src/nextmove/explain
+      hash: md5
+      md5: d74c3ab68bb3e1d03ec42b87e865f141.dir
+      size: 7810
+      nfiles: 2
+    - path: src/nextmove/models
+      hash: md5
+      md5: a866545a1ca6aada729c0b11244287ea.dir
+      size: 25638
+      nfiles: 6
+    - path: src/nextmove/policies
+      hash: md5
+      md5: d1fc0855cc1fa09e3c1e51b88efb1c59.dir
+      size: 13245
+      nfiles: 4
+    - path: src/nextmove/rules
+      hash: md5
+      md5: 2572a00d9291d4ee3f552b7cd87e3eb3.dir
+      size: 10031
+      nfiles: 3
+    - path: src/nextmove/simulator
+      hash: md5
+      md5: 90f972c07499b7c5ac2a7be1bf9ab227.dir
+      size: 85668
+      nfiles: 10
+    - path: src/nextmove/storage
+      hash: md5
+      md5: 36c1be5f2cb8ae25eb66df8614e23790.dir
+      size: 54766
+      nfiles: 6
+    outs:
+    - path: data/evaluation
+      hash: md5
+      md5: 167ed701d8338e061480dd4742d35911.dir
+      size: 9827759
+      nfiles: 5
+    - path: data/lineage/evaluate.parquet
+      hash: md5
+      md5: 2e6c6517831f4cd661ddfa36e98d7374
+      size: 4268
+    - path: reports/demo/evaluation
+      hash: md5
+      md5: 58775a55c925c35805007edc21d4d3c6.dir
+      size: 184865
+      nfiles: 20
+  mart:
+    cmd: uv run python -m nextmove.mart --profile demo
+    deps:
+    - path: config
+      hash: md5
+      md5: 5eacc084a50f211d4f20fe3fbf622c7f.dir
+      size: 16787
+      nfiles: 15
+    - path: data/canonical
+      hash: md5
+      md5: a08c841edd813ec3ec2302b392b7488c.dir
+      size: 31267392
+      nfiles: 2
+    - path: data/evaluation
+      hash: md5
+      md5: 167ed701d8338e061480dd4742d35911.dir
+      size: 9827759
+      nfiles: 5
+    - path: data/models
+      hash: md5
+      md5: fa3cc4792707e6b55c1760d7f7d516c9.dir
+      size: 3634248
+      nfiles: 6
+    - path: data/raw
+      hash: md5
+      md5: ae4c18d4c092677dbc5b1e4c64516031.dir
+      size: 31433723
+      nfiles: 4
+    - path: sql
+      hash: md5
+      md5: 32ee5468ab31961c87e9e5acd89f4668.dir
+      size: 14024
+      nfiles: 10
+    - path: src/nextmove/config
+      hash: md5
+      md5: ca702274d996034f33d4454019daca18.dir
+      size: 30761
+      nfiles: 3
+    - path: src/nextmove/mart
+      hash: md5
+      md5: a488f36e82160198c6689073563053bc.dir
+      size: 8955
+      nfiles: 3
+    - path: src/nextmove/storage
+      hash: md5
+      md5: 36c1be5f2cb8ae25eb66df8614e23790.dir
+      size: 54766
+      nfiles: 6
+    outs:
+    - path: data/mart
+      hash: md5
+      md5: 08643f03d7d10840339243d1a8bf85f6.dir
+      size: 16003072
+      nfiles: 1
+    - path: reports/demo/mart
+      hash: md5
+      md5: f2f660c87e3b84f805ce7f872a6fcd9f.dir
+      size: 7196578
+      nfiles: 18

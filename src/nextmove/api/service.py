@@ -123,9 +123,15 @@ class DecisionService:
                     "value": value,
                 }
             )
+        descriptions = {a.name: a.description for a in self.config.actions.catalog}
+        action_label = descriptions.get(decision.action.type, decision.action.type)
+        bps = decision.action.params.get("discount_bps")
+        if bps:
+            action_label = f"{action_label.rstrip('.')} ({int(bps) / 100:g}% off)."
         return {
             "customer_id": customer_id,
             "as_of": as_of.isoformat(),
+            "action_label": action_label,
             "primary_category": context.primary_category,
             "segment": segment,
             "contacts_last_7_days": context.contacts_within(7),
