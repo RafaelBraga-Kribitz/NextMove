@@ -35,7 +35,7 @@ commit that completes it.
 - [x] E4 Demo surface + screenshots (AC-14)
 
 ### M-F — Engineering and docs
-- [ ] F1 Clean-clone reproduce (AC-11)
+- [x] F1 Clean-clone reproduce (AC-11)
 - [ ] F2 Coverage gates (AC-12)
 - [x] F3 Runbook, model cards, OpenAPI export, assumption log
 - [x] F4 README rewrite, docs index, ADR table
@@ -78,3 +78,6 @@ commit that completes it.
   F3: runbook, demo script, acceptance matrix, model cards, OpenAPI export, assumption log;
   F4: README rewritten decision-first. The README contract check still fails on the registry
   status (`braga-portfolio-docs/manifest/portfolio.yaml` says Foundation) — human item.
+- **2026-10-14** — F1 (AC-11): fresh clone of `portfolio-grade` at 4d1c634 → `uv sync` →
+  `just reproduce` (all seven stages, 14m51s) → run `demo-f8fb25c032` → `just
+  verify-published` reported no diff in any published CSV/JSON (`VERIFY_PUBLISHED_OK`).
