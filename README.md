@@ -1,150 +1,198 @@
 # NextMove
 
-![NextMove — A headless behavioural decision engine for e-commerce next-best-action. Phase 1: reproducible simulated world, ingest, and features.](docs/assets/hero.png)
+**A next-best-action engine for e-commerce CRM that knows when to do nothing.**
 
 [![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
-[![Status: Foundation](https://img.shields.io/badge/status-Foundation-orange)](#status)
+[![Status: complete, evaluated in simulation](https://img.shields.io/badge/status-complete%20(simulation)-brightgreen)](#status)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-**Status:** Foundation
+**The decision:** in simulation, a CRM team running this simulated retailer should
+**drop the weekly rules-based contact playbook and blanket discounts in favour of
+restraint-first targeting**. Over a 20-week held-out test window, the decision engine earned
+more expected profit than the rules-only playbook, and 92% of the discounts that
+always-discount saw redeemed went to customers who would have bought anyway.
 
-E-commerce teams get scores, segments, and journeys — not a next action they can defend to finance. NextMove is a headless behavioral decision engine that turns customer events and business constraints into an explainable next-best-action, including the action of doing nothing.
+![Policy comparison: expected profit versus doing nothing, by policy, with 95% intervals (simulated data)](reports/demo/evaluation/policy_comparison.png)
 
-```mermaid
-flowchart TD
-    events[Raw events] --> features[Feature layer]
-    features --> behavior[Behavior analysis]
-    behavior --> models[ML models]
-    models --> engine[Decision engine]
-    rules[Business rules] --> engine
-    engine --> optimize[Optimization]
-    optimize --> explain[Explanation]
-    explain --> api[Headless API]
-    api --> outcomes[Simulator outcomes]
-    outcomes --> gateway[Evaluation and 3WD gateway]
-    gateway --> features
-```
-
-## Project status
-
-Phase 1 is a **reproducible simulated e-commerce world** plus the locked architecture, ADRs, and package boundaries. The decision API, trained models, and manager-facing demo are specified, not shipped.
-
-**Exists today:** simulator → ingest → point-in-time features, seeded and runnable on a laptop (`just reproduce`). Foundation documents and ten ADRs under [`docs/`](docs/README.md).
-
-**Does not exist yet:** production results, a live demo, or a quantitative policy comparison. No results are quoted here because none have been published. Decision evaluation in this project is in simulation only (ADR-004).
-
-## See it running
-
-There is no interactive UI in this phase. The runnable surface is the CLI pipeline:
+**The number:** **+€2,909** expected profit for the decision engine versus the rules-only
+playbook (95% CI €2,785 to €3,042), 1,983 simulated customers, 20 weekly decision rounds,
+run `demo-d3a9c2aa72`. **In simulation only** (ADR-004): no real customers, revenue or
+production use.
 
 ```bash
-uv sync
-just simulate profile="tiny"
-just ingest profile="tiny"
-just features profile="tiny"
+uv sync               # Python 3.12 environment
+just reproduce        # full seeded pipeline, ~20 min on a laptop -> reports/demo/
+just serve            # API + manager demo at http://127.0.0.1:8000/demo
 ```
 
-CI reproduces the same quality gate: `just ci` (ruff, import-linter, pytest). See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+Then open [`reports/demo/evaluation/evaluation_report.md`](reports/demo/evaluation/evaluation_report.md).
 
-## Explore this project
+**Skills demonstrated:** SQL (DuckDB star schema, CTEs, SQL tests) · Python · Power BI
+(build kit, DAX measures) · data quality / ETL (contracts, quarantine, gates, lineage) ·
+statistics (calibration, bootstrap intervals, uplift error) · experimentation (randomized
+A/B/n test, three-way decision gateway).
+Domain: e-commerce, customer / CRM analytics, segmentation, KPIs (Kennzahlen), purchase-propensity
+forecasting.
 
-| Audience | Start here |
-|---|---|
-| Recruiter | This page — problem, [Status](#status), [Architecture](#architecture) |
-| Hiring manager | [`docs/PROJECT_IDENTITY.md`](docs/PROJECT_IDENTITY.md) + [`docs/PRODUCT_CHARTER.md`](docs/PRODUCT_CHARTER.md) |
-| Technical reviewer | [`docs/ARCHITECTURAL_DIRECTION.md`](docs/ARCHITECTURAL_DIRECTION.md) + `src/nextmove/` |
-| Auditor | [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md) + [`docs/QUALITY_BAR.md`](docs/QUALITY_BAR.md) + ADRs |
+---
 
-Fast path: this README. Deep path: the foundation set indexed in [`docs/README.md`](docs/README.md).
+## Question
 
-## The idea
+*What should we do next for this customer, including waiting or doing nothing, under margin,
+inventory and message-fatigue constraints, with a reason a marketing manager can read?*
 
-Recommendation engines answer "which item?". NextMove answers "what should we do next for this customer — including wait or offer nothing — under inventory, margin, and fatigue constraints, with a reason a marketing manager can read."
-
-Every change to the system is specified to survive a three-way (accept / reject / delay) experimentation gateway before it ships. No LLM is in the decision or explanation path ([`docs/QUALITY_BAR.md`](docs/QUALITY_BAR.md)).
-
-## Method
-
-```text
-Simulator events
-  → ingest / schema validation
-  → point-in-time features
-  → (later) models + rules + decision engine
-  → explanation
-  → 3WD evaluation gateway
-```
-
-Phase 1 implements the first three stages. Later stages are specified in [`docs/DECISION_ENGINE_DESIGN.md`](docs/DECISION_ENGINE_DESIGN.md) and the ADRs; they are not claimed as implemented.
+Recommendation engines answer "which item?". NextMove ranks a whole action catalog (recommend,
+bundle, two discount tiers, email now or later, wait, do nothing) by **expected incremental
+profit** versus doing nothing, after hard business rules have removed what is not allowed.
 
 ## Data
 
 | Tag | Meaning | Applies to |
 |---|---|---|
-| `SIMULATED` | Generated by the seeded world in `src/nextmove/simulator` | Events, catalog, ground truth |
+| `SIMULATED` | Generated by the seeded world in `src/nextmove/simulator` | Events, catalog, inventory, ground truth, every result |
 | `ILLUSTRATIVE` | Design-time examples in docs | Charter personas, target metrics marked "X reported, not invented" |
 
-No client e-commerce data is in this repository. Assumption log: [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md).
+A simulated fashion-and-home retailer: 2,000 customers over 18 months (the `demo` profile), about
+1 million events (views, carts, orders, campaign messages), with documented latent traits and
+response functions ([`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md)). Events
+pass schema contracts and semantic data-quality gates; failures are quarantined, never
+dropped ([data-quality report](reports/demo/mart/data_quality.md)). No client data is in
+this repository.
 
-## Architecture
+## Method
 
-Nine load-bearing components (ML is one of them), from [`docs/ARCHITECTURAL_DIRECTION.md`](docs/ARCHITECTURAL_DIRECTION.md):
-
-1. Event ingestion and telemetry
-2. Feature layer
-3. Behavior analysis / segmentation
-4. ML models
-5. Decision engine
-6. Business rules
-7. Optimization layer
-8. Explanation engine
-9. Evaluation and 3WD gateway
-
-Package map (what is on disk under `src/nextmove/`):
-
-```text
-src/nextmove/
-  simulator/   ingest/   features/   storage/   config/
-  models/      segmentation/   rules/   decisions/
-  policies/    explain/   evaluate/   api/
+```mermaid
+flowchart LR
+    sim[Simulator] --> ingest[Ingest + DQ gates]
+    ingest --> feat[Point-in-time features]
+    feat --> exp[Randomized A/B/n experiment]
+    exp --> models[Calibrated response models]
+    models --> engine[Decision engine]
+    rules[Hard + soft rules] --> engine
+    engine --> explain[Templated explanation]
+    engine --> eval[Policy replay + 3WD gateway]
+    eval --> mart[(DuckDB SQL mart)]
+    mart --> bi[Power BI kit + demo]
 ```
 
-## Reproduce
+1. **Experiment.** A randomized A/B/n test assigns each eligible simulated customer a random
+   allowed action; the log keeps only observable columns.
+2. **Models.** Logistic regression and LightGBM, each a bootstrap ensemble, predict purchase
+   probability given an action. Temporal splits, Platt calibration, and a calibration gate that
+   fails the pipeline. Uplift = P(buy | action) − P(buy | none) (ADR-006).
+3. **Decision engine.** Candidates → hard constraints (discount ceiling, margin floor, low-stock
+   gate, weekly contact cap) → expected incremental profit minus soft penalties and an
+   uncertainty penalty → a typed `Decision` with interval, confidence, trace and a one-paragraph
+   reason ([contract](docs/api/decision.schema.json),
+   [style guide](docs/EXPLANATION_STYLE_GUIDE.md)).
+4. **Evaluation.** Every policy is replayed on the same customers, days and random draws
+   (common random numbers), with customer-bootstrap intervals and a hindsight-oracle ceiling.
+   A three-way gateway (accept / reject / delay) adjudicates promotions (ADR-008, ADR-012).
+5. **Analytics.** A DuckDB star schema (`fct_decisions`, `fct_outcomes`, `dim_customer`,
+   `dim_action`, `dim_date`, `dim_policy`) with SQL tests, KPI, retention-cohort and
+   data-quality tables, exported for Power BI ([`reporting/powerbi/`](reporting/powerbi/README.md)).
+
+## Result (simulated, run `demo-d3a9c2aa72`)
+
+| Policy | Expected profit vs. doing nothing [95% CI] | Contact rate | Wasted-discount share |
+|---|---|---:|---:|
+| Decision engine (GBM, selected on validation) | €0 [−€1, €0] | 0.0% | — |
+| Always discount | −€465 [−€501, −€430] | 2.6% | 92% |
+| Rules-only playbook | −€2,909 [−€3,042, −€2,786] | 17.2% | — |
+| Top-seller recommendation | −€4,503 [−€4,637, −€4,377] | 29.4% | — |
+| Hindsight oracle (ceiling, not deployable) | €44 [€38, €49] | 1.4% | — |
+
+- **GBM vs. rule baseline (AC-6):** the engine beats the rules-only playbook with a 95%
+  interval above zero; the 3WD gateway returns **Accept**, which for a policy promotion still
+  needs human sign-off (ADR-009).
+- **The engine does not beat doing nothing**: the gateway calls it a tie (Reject, inside the
+  indifference margin). The hindsight oracle shows why: even perfect knowledge adds only €44
+  over doing nothing, because the existing campaign calendar already fatigues these customers.
+- **Prediction axis:** both models pass the calibration gate (test ECE ≤ 0.01), but observable
+  features carry weak signal (test ROC AUC ≈ 0.51–0.53). Uplift is directionally right
+  (sign agreement 88–96%) but too close to zero: the models predict about −0.8 pp where the
+  truth is −2.4 pp ([uplift error](reports/demo/evaluation/uplift_error.csv),
+  [model cards](reports/demo/evaluation/model_cards/)).
+
+Full three-axis report, failure analysis and segment view:
+[`evaluation_report.md`](reports/demo/evaluation/evaluation_report.md).
+
+## Limitations
+
+- Decision quality is established **in simulation only**. The simulator is the primary data
+  source and the main credibility risk; read
+  [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md) before trusting any number.
+- In this simulated world, restraint is close to optimal, so the engine's value is in avoiding
+  harmful contacts, not in finding new revenue. A world with less campaign pressure could
+  rank actions differently.
+- Replay is open-loop on browsing and stock (DEBT-005); uplift is a difference of two
+  predictions, not a dedicated uplift learner (DEBT-001); 3WD thresholds are static (DEBT-002).
+- Reconsider any production-readiness claim until a real dataset has replaced the simulator
+  and a temporal holdout has been rerun on it.
+
+## Decision
+
+Ship **restraint-first targeting**: use the decision engine in place of the weekly playbook,
+keep the hard rules, and route any move towards more contact through the 3WD gateway with
+human sign-off. Do not invest in more model complexity for this customer base until the
+contact pressure changes: the measured ceiling is small.
+
+## See it running
+
+`just serve`, then [`/demo`](http://127.0.0.1:8000/demo): pick a customer → see the decision
+and its reason → see which options the rules removed → override → see the override priced on
+the evaluation page ([demo script](docs/DEMO_SCRIPT.md)). API reference at `/docs`
+([`openapi.json`](docs/api/openapi.json)).
+
+| Decision card | Override priced in evaluation |
+|---|---|
+| ![Demo: customer decision card (simulated)](docs/assets/demo_customer.png) | ![Demo: evaluation page with an override (simulated)](docs/assets/demo_evaluation.png) |
+
+## Explore this project
+
+| Audience | Start here |
+|---|---|
+| Recruiter | This page; [demo script](docs/DEMO_SCRIPT.md) |
+| Hiring manager | [Evaluation report](reports/demo/evaluation/evaluation_report.md), [ADR-011](docs/adr/011-portfolio-scope-for-hiring-market.md) |
+| Analyst / BI | [SQL mart](sql/mart/), [SQL tests](sql/tests/), [Power BI kit](reporting/powerbi/README.md) |
+| Technical reviewer | [`docs/ARCHITECTURAL_DIRECTION.md`](docs/ARCHITECTURAL_DIRECTION.md), [`src/nextmove/`](src/nextmove/), [acceptance matrix](docs/ACCEPTANCE_MATRIX.md) |
+| Auditor | [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md), [`docs/QUALITY_BAR.md`](docs/QUALITY_BAR.md), [ADRs](docs/README.md), [`DEBT.md`](DEBT.md) |
+
+## Reproduce and check
 
 Python 3.12, [`uv`](https://docs.astral.sh/uv/), [`just`](https://github.com/casey/just).
 
 ```bash
-git clone https://github.com/RafaelBraga-Kribitz/NextMove.git
-cd NextMove
+git clone https://github.com/RafaelBraga-Kribitz/NextMove.git && cd NextMove
 uv sync
-just ci
-just reproduce profile="tiny"
+just reproduce            # DVC DAG: simulate → ingest → features → experiment → train → evaluate → mart
+just verify-published     # published tables must match byte for byte (AC-11)
+just ci                   # ruff, format, import contracts, tests (same as CI)
+just coverage             # AC-12 coverage gates
 ```
 
-`just reproduce` runs the DVC DAG `simulate → ingest → features`. Expected artifacts: tables under `data/` (generated, not committed as the source of truth — lineage is in DVC).
-
-## Limitations
-
-- Decision quality is **not** established. There is no published policy-comparison table yet.
-- All future decision metrics from this repo are **in simulation** unless a later ADR says otherwise.
-- The simulator is the primary data source and the primary credibility risk; readers who skip [`docs/SIMULATOR_ASSUMPTIONS.md`](docs/SIMULATOR_ASSUMPTIONS.md) cannot tell signal from world-building artifact.
-- Reconsider any production-readiness claim if a client dataset has not been swapped in, or if a random (non-temporal) split appears in evaluation.
+CI runs the same checks plus the miniature `ci` profile end to end. Operations:
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md).
 
 ## Repository structure
 
 | Path | Responsibility |
 |---|---|
-| `src/nextmove/` | Product packages (simulator through API) |
+| `src/nextmove/` | simulator, ingest, features, models, segmentation, rules, decisions, policies, explain, evaluate, api, mart (+ config, storage) |
+| `sql/` | Mart models (`sql/mart/`) and SQL tests (`sql/tests/`) |
+| `reports/demo/` | Published, seeded results: evaluation report, model cards, mart exports |
+| `reporting/powerbi/` | Power BI build kit (the `.pbix` is built by hand from it) |
+| `config/` | Schema-validated configuration: every business number lives here |
+| `docs/` | Foundation documents, ADRs, runbook, acceptance matrix |
 | `tests/` | Unit, integration, leakage, golden |
-| `config/` | Schema-validated configuration |
-| `docs/` | Foundation documents and ADRs (SSOT) |
-| `dvc.yaml` / `dvc.lock` | Pipeline and artifact lineage |
 
 ## Status
 
-**Status:** Foundation
-
-GitHub description: reproducible simulated e-commerce world (Phase 1). Last validated against the in-repo foundation set on 2026-09-16.
+**Complete for the scoped release (ADR-011), evaluated in simulation only.** Out of scope and
+listed in [`docs/MILESTONES.md`](docs/MILESTONES.md#later-explicitly-out-of-scope-for-this-release-per-adr-011):
+dynamic 3WD thresholds, dedicated uplift learners, public-dataset validation, contextual
+bandits.
 
 ## License
 
