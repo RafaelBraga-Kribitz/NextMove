@@ -1,0 +1,3 @@
+candidate_id,decisions,mean_predicted_uplift,mean_true_uplift,mean_regret_cents,run_id
+email_delayed,2,0.007311,-0.002629,10.872444,demo-f8fb25c032
+none,34421,0.000000,0.000000,0.159899,demo-f8fb25c032

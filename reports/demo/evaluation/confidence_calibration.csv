@@ -1,0 +1,5 @@
+confidence_bin,decisions,mean_confidence,share_hindsight_optimal,mean_regret_cents,run_id
+"[0.0, 0.5)",58,0.206897,0.103448,12.096011,demo-f8fb25c032
+"[0.5, 0.75)",28,0.553571,0.142857,11.899235,demo-f8fb25c032
+"[0.75, 0.9)",195,0.862179,0.302564,7.409253,demo-f8fb25c032
+"[0.9, 1.0)",34142,1.000000,0.988255,0.089218,demo-f8fb25c032

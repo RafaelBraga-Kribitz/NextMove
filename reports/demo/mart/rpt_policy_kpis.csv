@@ -1,0 +1,8 @@
+policy,policy_label,is_ml_policy,decisions,contact_rate,restraint_rate,discount_rate,conversions,conversion_rate,profit_eur,expected_profit_vs_nothing_eur,discount_cost_eur,wasted_discount_share,no_incentive_rate_would_buy_anyway,mean_regret_cents,overrides
+always_discount,Always discount,false,34423,0.026,0.974,0.026,1345,0.039073,24311.51,-465.46,59.73,0.923077,0.97511,1.509659,0
+do_nothing,Do nothing,false,34423,0.0,1.0,0.0,1366,0.039683,24798.48,0.0,0.0,,1.0,0.160068,0
+expected_value_gbm,Decision engine (GBM),true,34423,5.8e-05,0.999942,0.0,1366,0.039683,24798.38,-0.21,0.0,,1.0,0.160522,0
+expected_value_logistic,Decision engine (logistic),false,34423,0.000639,0.999361,0.0,1366,0.039683,24797.38,-1.41,0.0,,1.0,0.163437,0
+oracle_upper_bound,"Hindsight oracle (upper bound, not deployable)",false,34423,0.013537,0.986463,0.0,1373,0.039886,24895.91,44.09,0.0,,1.0,0.0,0
+rules_only,Rules-only playbook,false,34423,0.171688,0.828312,0.0,1223,0.035529,21909.6,-2908.77,0.0,,1.0,8.605622,0
+top_seller,Top-seller recommendation,false,34423,0.294309,0.705691,0.0,1148,0.03335,20329.27,-4502.98,0.0,,1.0,13.209185,0

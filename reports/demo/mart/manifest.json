@@ -1,0 +1,21 @@
+{
+  "profile": "demo",
+  "row_counts": {
+    "dim_action": 11,
+    "dim_customer": 1993,
+    "dim_date": 548,
+    "dim_policy": 7,
+    "fct_decisions": 240961,
+    "fct_outcomes": 240961,
+    "rpt_data_quality": 2,
+    "rpt_policy_kpis": 7,
+    "rpt_retention_cohorts": 150
+  },
+  "sql_tests": {
+    "test_business_rules": 0,
+    "test_not_null_keys": 0,
+    "test_referential_integrity": 0,
+    "test_row_counts": 0,
+    "test_unique_keys": 0
+  }
+}

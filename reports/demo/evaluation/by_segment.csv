@@ -1,0 +1,5 @@
+segment,decisions,contact_rate,ml_vs_do_nothing_eur,ml_vs_always_discount_eur,mean_regret_cents,run_id
+buyers,5500,0.000000,0.000000,70.352724,0.000000,demo-f8fb25c032
+engaged_browsers,17080,0.000000,0.000000,307.126548,0.000000,demo-f8fb25c032
+joined_after_snapshot,8143,0.000246,-0.206004,31.369328,0.676439,demo-f8fb25c032
+occasional_browsers,3700,0.000000,0.000000,56.405149,0.004703,demo-f8fb25c032
