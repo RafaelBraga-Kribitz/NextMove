@@ -16,9 +16,10 @@ import yaml
 
 from nextmove.config.models import Config
 
-# The eight D-23 per-domain base files, read in this fixed order and merged onto one
-# accumulator. Each file wraps its own content under its own top-level key (e.g.
-# `simulator.yaml` under `simulator:`), so domain files cannot collide with one another.
+# The D-23 per-domain base files (eight in Phase 1; later domains are appended at the end),
+# read in this fixed order and merged onto one accumulator. Each file wraps its own content
+# under its own top-level key (e.g. `simulator.yaml` under `simulator:`), so domain files
+# cannot collide with one another.
 BASE_DOMAIN_FILES: tuple[str, ...] = (
     "simulator",
     "features",
@@ -28,6 +29,7 @@ BASE_DOMAIN_FILES: tuple[str, ...] = (
     "mcda",
     "experiments",
     "autonomy",
+    "policies",
 )
 
 # Default config tree: <repo_root>/config. loader.py lives at
@@ -82,7 +84,7 @@ def config_hash(config: Config) -> str:
 def load_config(profile: str, config_dir: Path | None = None) -> ResolvedConfig:
     """Resolve, validate, and hash the layered config for `profile`.
 
-    Reads the eight `BASE_DOMAIN_FILES` under `config_dir` in their fixed declared order,
+    Reads the `BASE_DOMAIN_FILES` under `config_dir` in their fixed declared order,
     deep-merging each onto an accumulator, then deep-merges the profile overlay
     (`config_dir/profiles/{profile}.yaml`) over that base. A file that parses to `None`
     (empty, or comments-only) is treated as `{}`.

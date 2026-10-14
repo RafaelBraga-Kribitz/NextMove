@@ -355,13 +355,104 @@ class AutonomyConfig(StrictModel):
 # ---------------------------------------------------------------------------------------
 
 
-class ConstraintsConfig(StrictModel):
-    """Populated by Phase 2: eligibility, frequency caps, inventory gates, discount
-    ceilings, brand safety. Empty and schema-locked until then."""
+class ActionVariant(StrictModel):
+    """One concrete parameterization of an archetype. `suffix` names the variant inside its
+    candidate id (`<archetype>__<suffix>`); an archetype with a single unnamed variant uses the
+    bare archetype name as its id."""
+
+    suffix: str | None = None
+    params: dict[str, str | int | float | bool] = Field(default_factory=dict)
+
+
+class ActionArchetype(StrictModel):
+    """One ADR-010 archetype: whether it contacts the customer (and so counts toward frequency
+    caps and fatigue), its per-send cost, and its small parameter grid."""
+
+    name: str = Field(min_length=1, pattern=r"^[a-z][a-z0-9_]*$")
+    description: str = Field(min_length=1)
+    contact: bool
+    cost_cents: int = Field(ge=0)
+    variants: list[ActionVariant] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _variant_suffixes_are_unique(self) -> "ActionArchetype":
+        suffixes = [variant.suffix for variant in self.variants]
+        if len(self.variants) > 1 and any(suffix is None for suffix in suffixes):
+            raise ValueError(f"archetype {self.name!r}: every variant needs a suffix")
+        if len(set(suffixes)) != len(suffixes):
+            raise ValueError(f"archetype {self.name!r}: duplicate variant suffixes")
+        return self
 
 
 class ActionsConfig(StrictModel):
-    """Populated by Phase 2: the action catalog. Empty and schema-locked until then."""
+    """The ADR-010 action catalog (A3). `none` and `wait` are mandatory: restraint is a
+    first-class action, so a catalog without them fails validation."""
+
+    horizon_days: int = Field(gt=0)
+    catalog: list[ActionArchetype]
+
+    @model_validator(mode="after")
+    def _restraint_present(self) -> "ActionsConfig":
+        names = [archetype.name for archetype in self.catalog]
+        if len(set(names)) != len(names):
+            raise ValueError("action catalog archetype names must be unique")
+        for required in ("none", "wait"):
+            if required not in names:
+                raise ValueError(f"action catalog must contain the {required!r} archetype")
+        for archetype in self.catalog:
+            if archetype.name in ("none", "wait") and archetype.contact:
+                raise ValueError(f"{archetype.name!r} must not contact the customer")
+        return self
+
+
+class ConstraintSpec(StrictModel):
+    """One configured constraint instance: which registered implementation, hard or soft,
+    its precedence class (`compliance > inventory > campaign > preference`), and its params."""
+
+    name: str = Field(min_length=1)
+    kind: str = Field(min_length=1)
+    mode: Literal["hard", "soft"]
+    precedence: Literal["compliance", "inventory", "campaign", "preference"]
+    params: dict[str, float | int | str | list[str]] = Field(default_factory=dict)
+
+
+class ConstraintsConfig(StrictModel):
+    """Declarative constraint set (A4). Hard constraints remove candidates before ranking; soft
+    constraints add a penalty (in cents) during ranking. The distinction is config, not code."""
+
+    rules: list[ConstraintSpec]
+
+    @model_validator(mode="after")
+    def _names_unique(self) -> "ConstraintsConfig":
+        names = [rule.name for rule in self.rules]
+        if len(set(names)) != len(names):
+            raise ValueError("constraint names must be unique")
+        return self
+
+
+class RulesOnlyPolicyConfig(StrictModel):
+    """Thresholds of the hand-written CRM playbook baseline (A5). Feature names refer to
+    feature-grid output columns."""
+
+    cart_units_min: int = Field(ge=1)
+    price_sensitivity_proxy_min: float = Field(ge=0.0)
+    discount_candidate: str = Field(min_length=1)
+    engaged_sessions_min: int = Field(ge=1)
+    engaged_candidate: str = Field(min_length=1)
+    lapsed_recency_days_min: int = Field(ge=1)
+    lapsed_candidate: str = Field(min_length=1)
+
+
+class BaselinesConfig(StrictModel):
+    top_seller_candidate: str = Field(min_length=1)
+    rules_only: RulesOnlyPolicyConfig
+
+
+class PoliciesConfig(StrictModel):
+    """Policy-level settings: the baselines (A5); the expected-value policy's utility weights
+    are added with the decision engine (C1)."""
+
+    baselines: BaselinesConfig
 
 
 class McdaConfig(StrictModel):
@@ -391,8 +482,9 @@ class Config(StrictModel):
     simulator: SimulatorConfig
     features: FeaturesConfig
     data_quality: DataQualityConfig
-    constraints: ConstraintsConfig = Field(default_factory=ConstraintsConfig)
-    actions: ActionsConfig = Field(default_factory=ActionsConfig)
+    constraints: ConstraintsConfig
+    actions: ActionsConfig
     mcda: McdaConfig = Field(default_factory=McdaConfig)
     experiments: ExperimentsConfig = Field(default_factory=ExperimentsConfig)
     autonomy: AutonomyConfig
+    policies: PoliciesConfig

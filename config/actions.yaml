@@ -1,2 +1,55 @@
-# Populated by Phase 2: the action catalog. Empty and schema-locked (ActionsConfig,
-# extra="forbid") until then.
+# ADR-010 action catalog (A3): eight archetypes, each with a small parameter grid. `none` and
+# `wait` are mandatory (restraint is a first-class action; ActionsConfig fails validation
+# without them). Timing and channel are fixed variant parameters, never searched dimensions
+# (DEC-04). `cost_cents` is the per-send operational cost charged whether or not the customer
+# converts; a discount's cost is charged only on conversion and is derived from discount_bps.
+actions:
+  # Outcome horizon each decision is evaluated over; also the decision cadence in replay.
+  horizon_days: 7
+  catalog:
+    - name: none
+      description: Do nothing this cycle.
+      contact: false
+      cost_cents: 0
+      variants: [{}]
+    - name: wait
+      description: Hold any contact and re-evaluate after the wait window.
+      contact: false
+      cost_cents: 0
+      variants: [{params: {wait_hours: 24}}]
+    - name: recommend
+      description: Personalised product recommendation in the next session.
+      contact: true
+      cost_cents: 5
+      variants:
+        - {suffix: top_seller, params: {placement: top_seller}}
+        - {suffix: affinity, params: {placement: affinity_category}}
+    - name: bundle
+      description: Premium bundle offer by email, no price reduction.
+      contact: true
+      cost_cents: 10
+      variants: [{params: {channel: email}}]
+    - name: discount_low
+      description: Small discount code.
+      contact: true
+      cost_cents: 10
+      variants:
+        - {suffix: 500bps, params: {discount_bps: 500}}
+        - {suffix: 1000bps, params: {discount_bps: 1000}}
+    - name: discount_high
+      description: Large discount code.
+      contact: true
+      cost_cents: 10
+      variants:
+        - {suffix: 2000bps, params: {discount_bps: 2000}}
+        - {suffix: 3000bps, params: {discount_bps: 3000}}
+    - name: email_now
+      description: Content email sent immediately.
+      contact: true
+      cost_cents: 5
+      variants: [{params: {channel: email, send_delay_hours: 0}}]
+    - name: email_delayed
+      description: Content email sent in the customer's usual engagement window.
+      contact: true
+      cost_cents: 5
+      variants: [{params: {channel: email, send_delay_hours: 6}}]
