@@ -443,6 +443,20 @@ class RulesOnlyPolicyConfig(StrictModel):
     lapsed_candidate: str = Field(min_length=1)
 
 
+class ExpectedValuePolicyConfig(StrictModel):
+    family: Literal["auto", "logistic", "gbm"]
+    risk_aversion: float = Field(ge=0.0)
+    min_confidence: float = Field(ge=0.0, le=1.0)
+    interval_quantiles: tuple[float, float]
+
+    @model_validator(mode="after")
+    def _quantiles(self) -> "ExpectedValuePolicyConfig":
+        low, high = self.interval_quantiles
+        if not 0.0 <= low < high <= 1.0:
+            raise ValueError("interval_quantiles must satisfy 0 <= low < high <= 1")
+        return self
+
+
 class BaselinesConfig(StrictModel):
     top_seller_candidate: str = Field(min_length=1)
     rules_only: RulesOnlyPolicyConfig
@@ -453,11 +467,93 @@ class PoliciesConfig(StrictModel):
     are added with the decision engine (C1)."""
 
     baselines: BaselinesConfig
+    expected_value: ExpectedValuePolicyConfig
+
+
+class EvaluationSeeds(StrictModel):
+    experiment: int
+    outcomes: int
+    bootstrap: int
+    models: int
+
+
+class EvaluationConfig(StrictModel):
+    """Temporal design of the simulated evaluation (ADR-012). Windows are fractions of the
+    simulated horizon so every profile gets the same train / validation / test shape:
+    `[warmup, train_end)` randomized experiment for training, `[train_end, validation_end)`
+    randomized experiment for calibration and model selection, `[validation_end, horizon)`
+    the held-out replay window every policy is compared on."""
+
+    warmup_days: int = Field(ge=1)
+    train_end_fraction: float = Field(gt=0.0, lt=1.0)
+    validation_end_fraction: float = Field(gt=0.0, lt=1.0)
+    experiment_every_days: int = Field(ge=1)
+    replay_every_days: int = Field(ge=1)
+    bootstrap_resamples: int = Field(ge=100)
+    ci_level: float = Field(gt=0.5, lt=1.0)
+    seeds: EvaluationSeeds
+
+    @model_validator(mode="after")
+    def _ordered(self) -> "EvaluationConfig":
+        if self.train_end_fraction >= self.validation_end_fraction:
+            raise ValueError("train_end_fraction must be < validation_end_fraction")
+        return self
+
+    def windows(self, horizon_days: int) -> tuple[int, int, int]:
+        """(train_end_day, validation_end_day, horizon_days)."""
+        train_end = max(self.warmup_days + 1, int(horizon_days * self.train_end_fraction))
+        validation_end = max(train_end + 1, int(horizon_days * self.validation_end_fraction))
+        return train_end, min(validation_end, horizon_days - 1), horizon_days
+
+
+class LogisticConfig(StrictModel):
+    C: float = Field(gt=0.0)
+    max_iter: int = Field(gt=0)
+
+
+class GbmConfig(StrictModel):
+    n_estimators: int = Field(gt=0)
+    learning_rate: float = Field(gt=0.0)
+    num_leaves: int = Field(ge=2)
+    min_child_samples: int = Field(ge=1)
+    subsample: float = Field(gt=0.0, le=1.0)
+    colsample_bytree: float = Field(gt=0.0, le=1.0)
+    reg_lambda: float = Field(ge=0.0)
+
+
+class CalibrationConfig(StrictModel):
+    max_ece: float = Field(gt=0.0, lt=1.0)
+    reliability_bins: int = Field(ge=2)
+
+
+class ModelsConfig(StrictModel):
+    ensemble_size: int = Field(ge=2)
+    logistic: LogisticConfig
+    gbm: GbmConfig
+    calibration: CalibrationConfig
+    attribution_top_k: int = Field(ge=1)
+
+
+class McdaCriterion(StrictModel):
+    weight: float = Field(gt=0.0)
+    direction: Literal["benefit", "cost"]
+
+
+class SegmentationConfig(StrictModel):
+    features: list[str] = Field(min_length=1)
+    kmeans_k: list[int] = Field(min_length=1)
+    min_segment_share: float = Field(gt=0.0, lt=1.0)
+    max_segments: int = Field(ge=2)
+    stability_resamples: int = Field(ge=2)
+    sensitivity_factor: float = Field(gt=0.0, lt=1.0)
+    interpretability: dict[str, float]
 
 
 class McdaConfig(StrictModel):
-    """Populated by Phase 4: MCDA criteria and weights for segmentation method selection.
-    Empty and schema-locked until then."""
+    """MCDA criteria and weights for segmentation method selection (AC-7)."""
+
+    criteria: dict[str, McdaCriterion]
+    segmentation: SegmentationConfig
 
 
 class ExperimentsConfig(StrictModel):
@@ -484,7 +580,9 @@ class Config(StrictModel):
     data_quality: DataQualityConfig
     constraints: ConstraintsConfig
     actions: ActionsConfig
-    mcda: McdaConfig = Field(default_factory=McdaConfig)
+    mcda: McdaConfig
     experiments: ExperimentsConfig = Field(default_factory=ExperimentsConfig)
     autonomy: AutonomyConfig
     policies: PoliciesConfig
+    evaluation: EvaluationConfig
+    models: ModelsConfig

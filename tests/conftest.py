@@ -19,3 +19,27 @@ def tiny_profile_name() -> str:
 def repo_root() -> Path:
     """Absolute path to the repository root."""
     return Path(__file__).resolve().parent.parent
+
+
+@pytest.fixture(scope="session")
+def tiny_pipeline(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """The tiny profile run through simulate -> ingest -> features -> experiment -> train, once
+    per session, into a private output root. Decision-layer tests build on it."""
+    import subprocess
+    import sys
+
+    root = tmp_path_factory.mktemp("tiny_pipeline")
+    commands = [
+        ["nextmove.simulator"],
+        ["nextmove.ingest"],
+        ["nextmove.features"],
+        ["nextmove.evaluate", "experiment"],
+        ["nextmove.models"],
+    ]
+    for command in commands:
+        subprocess.run(
+            [sys.executable, "-m", *command, "--profile", "tiny", "--out", str(root)],
+            check=True,
+            capture_output=True,
+        )
+    return root

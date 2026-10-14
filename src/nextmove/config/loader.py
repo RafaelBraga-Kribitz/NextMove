@@ -30,6 +30,8 @@ BASE_DOMAIN_FILES: tuple[str, ...] = (
     "experiments",
     "autonomy",
     "policies",
+    "evaluation",
+    "models",
 )
 
 # Default config tree: <repo_root>/config. loader.py lives at

@@ -57,3 +57,40 @@ stages:
     outs:
       - data/features
       - data/lineage/features.parquet
+
+  # Decision layer (ADR-012). `experiment` reads ground truth through the outcome oracle in
+  # nextmove.evaluate (the only decision-layer package allowed to); its output log holds
+  # observable columns only.
+  experiment:
+    cmd: uv run python -m nextmove.evaluate experiment --profile ${profile}
+    deps:
+      - data/features
+      - data/canonical
+      - data/raw
+      - data/ground_truth
+      - src/nextmove/evaluate
+      - src/nextmove/decisions
+      - src/nextmove/rules
+      - src/nextmove/models
+      - src/nextmove/simulator
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/experiment
+      - data/lineage/experiment.parquet
+
+  train:
+    cmd: uv run python -m nextmove.models --profile ${profile}
+    deps:
+      - data/experiment
+      - data/features
+      - data/canonical
+      - src/nextmove/models
+      - src/nextmove/segmentation
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/models
+      - data/lineage/train.parquet

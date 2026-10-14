@@ -11,3 +11,4 @@ build/
 mlruns/
 mlflow.db
 data/
+mlruns.db

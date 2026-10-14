@@ -92,7 +92,7 @@ reproduce profile="default":
     set -eu
     p="{{ trim_start_match(profile, "profile=") }}"
     sed -i "s/^  - profile: .*/  - profile: ${p}/" dvc.yaml
-    uv run dvc repro simulate ingest features
+    uv run dvc repro
 
 # Inspect one table's full content-hash lineage chain (DATA-04): the config hash and content
 # hash of the table itself, and of every input table it was derived from, walked transitively.

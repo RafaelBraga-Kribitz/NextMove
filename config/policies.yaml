@@ -16,3 +16,12 @@ policies:
       engaged_candidate: recommend__affinity
       lapsed_recency_days_min: 60
       lapsed_candidate: email_delayed
+  # Expected-value policy (C1): score = E[incremental profit vs none] - soft penalties
+  #   - risk_aversion * sd(incremental profit across the model ensemble), all in cents.
+  expected_value:
+    family: auto            # auto = the family selected on the validation-window replay
+    risk_aversion: 1.0
+    # Below this confidence (share of ensemble members that rank the choice first), the
+    # engine falls back to the safe default `none` and says so in the explanation.
+    min_confidence: 0.5
+    interval_quantiles: [0.1, 0.9]
