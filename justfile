@@ -105,3 +105,7 @@ lineage table:
 # without losing DVC's content-addressable object store.
 clean:
     rm -rf data
+
+# Regenerate the checked-in JSON schema of the public Decision contract (docs/api/).
+schema:
+    uv run python -c "from nextmove.decisions.contract import decision_json_schema; open('docs/api/decision.schema.json', 'w', encoding='utf-8').write(decision_json_schema())"
