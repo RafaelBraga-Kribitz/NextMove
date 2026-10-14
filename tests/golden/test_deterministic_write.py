@@ -428,11 +428,9 @@ def test_staging_part_files_roundtrip_and_isolation(tmp_path, resolved_config):
     root = tmp_path
     # Touch every zone so clear_staging's "leaves every zone intact" claim is checkable --
     # a zone directory only exists once something has been written into it.
-    for zone, stage in (
-        (st.Zone.RAW, st.Stage.SIMULATE),
-        (st.Zone.FEATURES, st.Stage.FEATURES),
-        (st.Zone.GROUND_TRUTH, st.Stage.SIMULATE),
-    ):
+    # Every zone except lineage (written only by record_lineage) and canonical (written below).
+    seeded = [z for z in st.Zone if z not in (st.Zone.LINEAGE, st.Zone.CANONICAL)]
+    for zone, stage in ((z, st.Stage.SIMULATE) for z in seeded):
         st.write_table(
             [InventoryRow(tick=0, sku="seed", qty=0)],
             f"seed_{zone.value}",

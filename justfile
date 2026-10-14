@@ -117,3 +117,15 @@ openapi:
 # Serve the API and the manager demo on http://127.0.0.1:8000 (demo at /demo, docs at /docs).
 serve profile="demo":
     NEXTMOVE_PROFILE={{ trim_start_match(profile, "profile=") }} uv run uvicorn nextmove.api.app:create_app --factory --host 127.0.0.1 --port 8000
+
+# AC-12: coverage of the unit suite plus the decision-layer integration tests (the
+# simulation-budget suites are excluded: they measure memory and must not run under a tracer),
+# then the per-package gates (rules/decisions/evaluate >= 85%, overall >= 75%).
+coverage:
+    uv run pytest -q -p no:warnings --cov=nextmove --cov-report=json:coverage.json --cov-report=term tests/unit tests/golden/test_decision_golden.py tests/integration/test_train_stage.py tests/integration/test_evaluate_stage.py tests/integration/test_api.py tests/integration/test_mart.py tests/integration/test_overrides.py tests/integration/test_powerbi_kit.py
+    uv run python scripts/coverage_gate.py coverage.json
+
+# AC-11: after `just reproduce`, the regenerated published tables must equal the committed
+# ones byte for byte (runtime.json holds machine-dependent latency and is excluded).
+verify-published profile="demo":
+    git diff --exit-code --stat -- 'reports/{{ trim_start_match(profile, "profile=") }}/**/*.csv' 'reports/{{ trim_start_match(profile, "profile=") }}/**/*.json' ':(exclude)reports/**/runtime.json'

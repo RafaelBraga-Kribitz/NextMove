@@ -288,3 +288,18 @@ research corpus supports, not values fit to any real dataset. Every headline res
 simulator's data ever produces must therefore be reported "in simulation" — this is a synthetic
 world with documented, auditable, but ultimately assumed generative rules, not a measurement of
 real customer behavior.
+
+## Evaluation-time assumptions (decision layer, ADR-012)
+
+These assumptions belong to how the decision layer *uses* the simulator, not to the world
+itself; they are listed here so the assumption log stays complete.
+
+| # | Assumption | Where | Effect on results |
+|---|---|---|---|
+| E-1 | One decision is evaluated as one purchase response at the next visit, `p(a) = clamp(base_conversion_probability × response_multiplier)` — the same function behind `ground_truth_uplift` | `nextmove.evaluate.world` | Results are about the documented response function; the session/cart stages of the tick loop are not re-run in replay |
+| E-2 | `none` and `wait` deliver nothing inside the decision window and evaluate to `p(none)` | `OutcomeOracle.p_convert` | The simulator's `wait` multiplier is never exercised in replay |
+| E-3 | A delivered action raises the all-time contact counter by one before its response is drawn | `OutcomeOracle.p_convert`, `rollout` | Mirrors the tick loop; fatigue accumulates across replayed decisions |
+| E-4 | Common random numbers: one uniform draw per (customer, day), shared by all policies | `common_random_numbers` | Paired comparisons; "would buy anyway" is identical across policies |
+| E-5 | Replay is open-loop on browsing and stock: replayed actions do not change later feature rows or inventory | `rollout` (DEBT-005) | Long-run effects of actions on engagement and scarcity are not captured |
+| E-6 | Order value and margin per decision are the category's historical average order value (orders before the end of the training window) and catalog margin | `ContextStore._load_reference` | Profit is in expected-value units per category, not per basket |
+| E-7 | The randomized training experiment draws uniformly among actions that pass the hard constraints | `nextmove.evaluate.experiment` | Action effects are learned only where actions are allowed, which is where the policy needs them |

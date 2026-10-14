@@ -1,0 +1,79 @@
+// NextMove — DAX measures. Create a table `_Measures` and add each measure below.
+// All values are simulated (ADR-004). Format strings in comments.
+
+// ---- Volume ---------------------------------------------------------------------------
+Decisions = COUNTROWS ( fct_decisions )                                     // #,0
+Contact Rate =                                                               // 0.0%
+    DIVIDE (
+        CALCULATE ( COUNTROWS ( fct_decisions ), dim_action[is_contact] = TRUE () ),
+        [Decisions]
+    )
+Restraint Rate =                                                             // 0.0%
+    DIVIDE (
+        CALCULATE ( COUNTROWS ( fct_decisions ), dim_action[is_restraint] = TRUE () ),
+        [Decisions]
+    )
+Discount Rate =                                                              // 0.0%
+    DIVIDE (
+        CALCULATE ( COUNTROWS ( fct_decisions ), dim_action[is_discount] = TRUE () ),
+        [Decisions]
+    )
+
+// ---- Outcomes -------------------------------------------------------------------------
+Conversions = CALCULATE ( COUNTROWS ( fct_outcomes ), fct_outcomes[converted] = TRUE () )  // #,0
+Conversion Rate = DIVIDE ( [Conversions], [Decisions] )                     // 0.00%
+Profit = SUM ( fct_outcomes[profit_eur] )                                    // €#,0
+Expected Profit = SUM ( fct_outcomes[expected_profit_eur] )                  // €#,0
+Profit vs Doing Nothing =                                                    // €#,0;-€#,0
+    SUM ( fct_outcomes[expected_profit_eur] )
+        - SUM ( fct_outcomes[expected_profit_if_nothing_eur] )
+Discount Cost = SUM ( fct_outcomes[discount_cost_eur] )                      // €#,0
+
+// Uplift: the engine's predicted change in purchase probability, and the simulator's truth.
+Avg Predicted Uplift = AVERAGE ( fct_decisions[uplift_estimate] )            // +0.00%
+Avg True Uplift = AVERAGE ( fct_outcomes[true_uplift] )                      // +0.00%
+Uplift Error (pp) = ( [Avg Predicted Uplift] - [Avg True Uplift] ) * 100     // +0.00
+
+// ---- Restraint KPIs (the headline) ----------------------------------------------------
+Wasted Discount Share =                                                      // 0%
+    DIVIDE (
+        CALCULATE ( COUNTROWS ( fct_outcomes ), fct_outcomes[is_wasted_discount] = TRUE () ),
+        CALCULATE (
+            COUNTROWS ( fct_outcomes ),
+            fct_outcomes[converted] = TRUE (),
+            dim_action[is_discount] = TRUE ()
+        )
+    )
+No-Incentive Rate (Would Buy Anyway) =                                       // 0%
+    DIVIDE (
+        CALCULATE (
+            COUNTROWS ( fct_outcomes ),
+            fct_outcomes[would_buy_anyway] = TRUE (),
+            dim_action[is_discount] = FALSE ()
+        ),
+        CALCULATE ( COUNTROWS ( fct_outcomes ), fct_outcomes[would_buy_anyway] = TRUE () )
+    )
+Mean Regret (cents) = AVERAGE ( fct_outcomes[regret_eur] ) * 100            // 0.00
+
+// ---- Governance -----------------------------------------------------------------------
+Overrides = CALCULATE ( COUNTROWS ( fct_decisions ), fct_decisions[is_overridden] = TRUE () )
+Override Rate = DIVIDE ( [Overrides], [Decisions] )                          // 0.00%
+Avg Confidence = AVERAGE ( fct_decisions[confidence] )                      // 0%
+
+// ---- Model quality (disconnected table model_metrics) ---------------------------------
+Brier Score (test) =                                                         // 0.00000
+    CALCULATE (
+        AVERAGE ( model_metrics[brier] ),
+        model_metrics[split] = "test",
+        model_metrics[archetype] = "all"
+    )
+ECE (test) =                                                                 // 0.0000
+    CALCULATE (
+        AVERAGE ( model_metrics[ece] ),
+        model_metrics[split] = "test",
+        model_metrics[archetype] = "all"
+    )
+
+// ---- Customer analytics ---------------------------------------------------------------
+Customers = DISTINCTCOUNT ( fct_decisions[customer_key] )                    // #,0
+Avg CLV Estimate = AVERAGE ( dim_customer[clv_12m_estimate_eur] )            // €#,0.00

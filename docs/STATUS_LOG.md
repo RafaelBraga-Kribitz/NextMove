@@ -16,22 +16,22 @@ commit that completes it.
 ### M-B — Models and segmentation
 - [x] B1 Segmentation + viability + MCDA scorecard (AC-7)
 - [x] B2 Response models, calibration gate (AC-5), attributions, model cards, MLflow, DVC stage
-- [ ] B3 Uplift delta + approximation-error analysis
+- [x] B3 Uplift delta + approximation-error analysis
 
 ### M-C — Decision engine and explanation
 - [x] C1 Decision engine + golden determinism (AC-3)
 - [x] C2 Templated explanations + style guide + phrasing scan
 
 ### M-D — Evaluation
-- [ ] D1 Three-axis report, replay profit CIs (AC-6), failure analysis
-- [ ] D2 3WD gateway fixtures (AC-8) + Delay escalation (AC-9)
-- [ ] D3 Policy comparison, one command (AC-10), wasted-discount share
-- [ ] D4 Override loop into evaluation (UC1)
+- [x] D1 Three-axis report, replay profit CIs (AC-6), failure analysis
+- [x] D2 3WD gateway fixtures (AC-8) + Delay escalation (AC-9)
+- [x] D3 Policy comparison, one command (AC-10), wasted-discount share
+- [x] D4 Override loop into evaluation (UC1)
 
 ### M-E — API, mart and reporting
-- [ ] E1 API + OpenAPI
-- [ ] E2 SQL mart + SQL tests + data-quality report
-- [ ] E3 Power BI build kit
+- [x] E1 API + OpenAPI
+- [x] E2 SQL mart + SQL tests + data-quality report
+- [x] E3 Power BI build kit
 - [ ] E4 Demo surface + screenshots (AC-14)
 
 ### M-F — Engineering and docs
@@ -59,3 +59,15 @@ commit that completes it.
   file. Early finding (simulation only): the oracle-optimal policy chooses `none` for ~98% of
   test-window customer-weeks because the existing campaign calendar already fatigues
   customers; observable features carry weak signal (test AUC ≈ 0.51–0.53). Reported as is.
+- **2026-10-14** — B3/D1–D4: evaluate stage (validation-window model selection, test-window
+  replay of seven policies incl. a hindsight oracle, bootstrap CIs, uplift error, 3WD verdicts,
+  overrides, report + model cards). Result on `demo` (run `demo-d3a9c2aa72`, simulation only):
+  engine ≈ do-nothing, beats rules-only by €2,909 [€2,785, €3,042]; gateway Accept vs
+  rules-only (needs sign-off), Reject (in-margin) vs do-nothing; oracle ceiling +€44.
+- **2026-10-14** — E1/E2/E3: FastAPI app + OpenAPI export, demo pages, DuckDB star-schema mart
+  with 5 SQL test files, data-quality report, Power BI kit with a column-reference test.
+- **2026-10-14** — CI on 4b65de6 failed one golden storage test (`test_staging_part_files_
+  roundtrip_and_isolation`: it iterates every `Zone`, and new zones were not seeded). Fixed by
+  seeding every non-lineage zone; reproduced locally before and after.
+- **2026-10-14** — F2: AC-12 gate (`just coverage`, `scripts/coverage_gate.py`) added to CI;
+  decision-layer coverage 85% overall, rules/decisions/evaluate ≥ 92%.

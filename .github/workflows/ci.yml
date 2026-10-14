@@ -48,6 +48,10 @@ jobs:
       - name: Golden reproducibility suite
         run: uv run pytest tests/golden -q -m slow
 
+      # AC-12: rules/, decisions/ and evaluate/ >= 85% line coverage, >= 75% overall.
+      - name: Coverage gate (AC-12)
+        run: just coverage
+
       # HIGH-10 / gap closure G-01-2: the RSS gate cannot vanish by permanent skip, and it
       # cannot silently select nothing either -- both were true of this step's previous `-m
       # slow` filter (.planning/debug/ci-budget-marker-mismatch.md). Selection is now by the
