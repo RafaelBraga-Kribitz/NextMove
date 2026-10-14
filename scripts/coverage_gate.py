@@ -39,8 +39,10 @@ def main(path: str = "coverage.json") -> int:
     overall = 100.0 * covered / statements
     ok = overall >= OVERALL_THRESHOLD
     failed |= not ok
-    print(f"{'overall':<14}{statements:>8}{covered:>9}{overall:>8.1f}%  "
-          f"{'ok' if ok else f'FAIL (< {OVERALL_THRESHOLD:.0f}%)'}")
+    print(
+        f"{'overall':<14}{statements:>8}{covered:>9}{overall:>8.1f}%  "
+        f"{'ok' if ok else f'FAIL (< {OVERALL_THRESHOLD:.0f}%)'}"
+    )
     return 1 if failed else 0
 
 
