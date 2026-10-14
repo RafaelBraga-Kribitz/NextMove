@@ -32,13 +32,13 @@ commit that completes it.
 - [x] E1 API + OpenAPI
 - [x] E2 SQL mart + SQL tests + data-quality report
 - [x] E3 Power BI build kit
-- [ ] E4 Demo surface + screenshots (AC-14)
+- [x] E4 Demo surface + screenshots (AC-14)
 
 ### M-F — Engineering and docs
 - [ ] F1 Clean-clone reproduce (AC-11)
 - [ ] F2 Coverage gates (AC-12)
-- [ ] F3 Runbook, model cards, OpenAPI export, assumption log
-- [ ] F4 README rewrite, docs index, ADR table
+- [x] F3 Runbook, model cards, OpenAPI export, assumption log
+- [x] F4 README rewrite, docs index, ADR table
 
 ## Log
 
@@ -71,3 +71,10 @@ commit that completes it.
   seeding every non-lineage zone; reproduced locally before and after.
 - **2026-10-14** — F2: AC-12 gate (`just coverage`, `scripts/coverage_gate.py`) added to CI;
   decision-layer coverage 85% overall, rules/decisions/evaluate ≥ 92%.
+- **2026-10-14** — Published run: `just reproduce` (demo, 30 min) produced run
+  `demo-f8fb25c032`; re-running evaluate + mart reproduced the same run id and tables. The
+  scratch run's id differed only because its feature grid carried an older config-hash stamp.
+  Local full suite (`-m "not peak_rss"`) green. E4: demo screenshots captured with Playwright;
+  F3: runbook, demo script, acceptance matrix, model cards, OpenAPI export, assumption log;
+  F4: README rewritten decision-first. The README contract check still fails on the registry
+  status (`braga-portfolio-docs/manifest/portfolio.yaml` says Foundation) — human item.
