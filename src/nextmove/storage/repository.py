@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Literal, Union, get_args, get_origin
 
 import duckdb
+import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 from pydantic import BaseModel
@@ -580,3 +581,74 @@ def query(sql: str, root: Path | None = None, **table_bindings: Path) -> Table:
         return con.execute(sql).to_arrow_table()
     finally:
         con.close()
+
+
+# ------------------------------------------------------------------------------------------
+# DataFrame surface (decision layer, M-B onward)
+# ------------------------------------------------------------------------------------------
+
+_PANDAS_TO_ARROW: dict[str, pa.DataType] = {
+    "int64": pa.int64(),
+    "int32": pa.int64(),
+    "float64": pa.float64(),
+    "float32": pa.float64(),
+    "bool": pa.bool_(),
+    "object": pa.string(),
+    "string": pa.string(),
+    "str": pa.string(),
+}
+
+
+def _arrow_schema_for_frame(frame: pd.DataFrame) -> pa.Schema:
+    fields = []
+    for name, dtype in frame.dtypes.items():
+        key = str(dtype)
+        if key.startswith("datetime64"):
+            arrow_type: pa.DataType = pa.timestamp("us", tz="UTC")
+        elif key in _PANDAS_TO_ARROW:
+            arrow_type = _PANDAS_TO_ARROW[key]
+        else:
+            raise TypeError(f"column {name!r} has unsupported dtype {key!r}")
+        fields.append(pa.field(str(name), arrow_type, nullable=True))
+    return pa.schema(fields)
+
+
+def write_frame(
+    frame: pd.DataFrame,
+    table_name: str,
+    zone: Zone,
+    sort_key: tuple[str, ...],
+    resolved_config: ResolvedConfig,
+    producer_stage: Stage,
+    input_paths: Sequence[Path] = (),
+    extra_metadata: Mapping[str, str] | None = None,
+    root: Path | None = None,
+) -> Path:
+    """Write a pandas DataFrame through the same sorted, atomic, lineage-recording path as
+    `write_table`. The Arrow schema is built explicitly from the frame's dtypes (int64,
+    float64, bool, string, UTC timestamps), never inferred from values."""
+    if zone is Zone.LINEAGE:
+        raise ValueError("write_frame refuses the lineage zone")
+    dest = resolve_table_path(table_name, zone, root)
+    schema = _arrow_schema_for_frame(frame)
+    table = pa.Table.from_pandas(frame.reset_index(drop=True), schema=schema, preserve_index=False)
+    metadata, input_tables = _stamp_metadata(
+        resolved_config, producer_stage, input_paths, extra_metadata
+    )
+    write_parquet_atomic(table, dest, sort_key, metadata)
+    draft = LineageRecordDraft(
+        table_name=table_name,
+        zone=zone.value,
+        input_tables=input_tables,
+        config_hash=resolved_config.config_hash,
+        contract_version=CONTRACT_VERSION,
+        producer_stage=producer_stage,
+        row_count=table.num_rows,
+    )
+    _record_lineage(dest, draft, input_paths, root)
+    return dest
+
+
+def read_frame(table_name: str, zone: Zone, root: Path | None = None) -> pd.DataFrame:
+    """Read a table as a pandas DataFrame."""
+    return read_table(table_name, zone, root).to_pandas()

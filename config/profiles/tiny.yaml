@@ -6,3 +6,6 @@ simulator:
   # Snapshot every tick at this tiny scale so ground_truth_uplift row counts stay meaningful
   # in fast tests without paying the default profile's monthly-cadence sizing tradeoff.
   uplift_snapshot_every_ticks: 1
+# ~300 experiment rows cannot support a 1-point calibration bound; the gate still runs.
+models:
+  calibration: {max_ece: 0.10}

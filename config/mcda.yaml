@@ -1,2 +1,28 @@
-# Populated by Phase 4: MCDA criteria and weights (TOPSIS / PROMETHEE II) for segmentation
-# method selection. Empty and schema-locked (McdaConfig, extra="forbid") until then.
+# Segmentation method selection (B1, AC-7). Candidate segmentations of the customer base are
+# checked against viability constraints, then ranked by TOPSIS over the criteria below.
+# Weights are hand-set (logged debt, DEBT-004) and every run reports a +/-50% weight
+# sensitivity check on the winner.
+mcda:
+  criteria:
+    silhouette: {weight: 0.30, direction: benefit}
+    size_balance: {weight: 0.20, direction: benefit}
+    stability: {weight: 0.30, direction: benefit}
+    interpretability: {weight: 0.20, direction: benefit}
+  segmentation:
+    features:
+      - rfm_recency_days
+      - rfm_frequency_count
+      - rfm_monetary_cents
+      - session_visits_count
+      - price_sensitivity_proxy
+      - contacts_total
+    kmeans_k: [3, 4, 5, 6]
+    min_segment_share: 0.05
+    max_segments: 6
+    stability_resamples: 5
+    sensitivity_factor: 0.5
+    # Interpretability is a judgement, recorded here rather than computed: a named RFM tier
+    # is directly readable by a CRM manager; a k-means cluster needs profiling first.
+    interpretability:
+      rfm_rules: 1.0
+      kmeans: 0.5

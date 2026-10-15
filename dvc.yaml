@@ -19,7 +19,7 @@
 # No off-laptop storage backend is configured anywhere in this file: ENG-08 forbids a cloud
 # dependency, and DVC's local cache is sufficient for the laptop-only guarantee.
 vars:
-  - profile: default
+  - profile: demo
 
 stages:
   simulate:
@@ -57,3 +57,86 @@ stages:
     outs:
       - data/features
       - data/lineage/features.parquet
+
+  # Decision layer (ADR-012). `experiment` reads ground truth through the outcome oracle in
+  # nextmove.evaluate (the only decision-layer package allowed to); its output log holds
+  # observable columns only.
+  experiment:
+    cmd: uv run python -m nextmove.evaluate experiment --profile ${profile}
+    deps:
+      - data/features
+      - data/canonical
+      - data/raw
+      - data/ground_truth
+      - src/nextmove/evaluate
+      - src/nextmove/decisions
+      - src/nextmove/rules
+      - src/nextmove/models
+      - src/nextmove/simulator
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/experiment
+      - data/lineage/experiment.parquet
+
+  train:
+    cmd: uv run python -m nextmove.models --profile ${profile}
+    deps:
+      - data/experiment
+      - data/features
+      - data/canonical
+      - src/nextmove/models
+      - src/nextmove/segmentation
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/models
+      - data/lineage/train.parquet
+
+  # Policy replay, three-axis report, uplift error, 3WD verdicts (D1-D4). Published files go to
+  # reports/<profile>/evaluation/ (git-tracked, cache: false), tables to data/evaluation (DVC-cached).
+  evaluate:
+    cmd: uv run python -m nextmove.evaluate evaluate --profile ${profile}
+    deps:
+      - data/models
+      - data/experiment
+      - data/features
+      - data/canonical
+      - data/raw
+      - data/ground_truth
+      - src/nextmove/evaluate
+      - src/nextmove/decisions
+      - src/nextmove/policies
+      - src/nextmove/explain
+      - src/nextmove/rules
+      - src/nextmove/models
+      - src/nextmove/simulator
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/evaluation
+      - data/lineage/evaluate.parquet
+      - reports/${profile}/evaluation:
+          cache: false
+
+  # SQL-first analytics layer (ADR-011): star-schema mart, SQL tests, Power BI exports and the
+  # data-quality report.
+  mart:
+    cmd: uv run python -m nextmove.mart --profile ${profile}
+    deps:
+      - data/evaluation
+      - data/models
+      - data/canonical
+      - data/raw
+      - sql
+      - src/nextmove/mart
+      - src/nextmove/storage
+      - src/nextmove/config
+      - config
+    outs:
+      - data/mart
+      - reports/${profile}/mart:
+          cache: false

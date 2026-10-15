@@ -87,12 +87,12 @@ budget-rss:
 # profiles correctly invalidates the stage cache, and re-running with the same profile is a
 # genuine no-op (dvc.yaml's only change is the resolved cmd text, which is identical run to
 # run for a fixed profile).
-reproduce profile="default":
+reproduce profile="demo":
     #!/usr/bin/env sh
     set -eu
     p="{{ trim_start_match(profile, "profile=") }}"
     sed -i "s/^  - profile: .*/  - profile: ${p}/" dvc.yaml
-    uv run dvc repro simulate ingest features
+    uv run dvc repro
 
 # Inspect one table's full content-hash lineage chain (DATA-04): the config hash and content
 # hash of the table itself, and of every input table it was derived from, walked transitively.
@@ -105,3 +105,27 @@ lineage table:
 # without losing DVC's content-addressable object store.
 clean:
     rm -rf data
+
+# Regenerate the checked-in JSON schema of the public Decision contract (docs/api/).
+schema:
+    uv run python -c "from nextmove.decisions.contract import decision_json_schema; open('docs/api/decision.schema.json', 'w', encoding='utf-8').write(decision_json_schema())"
+
+# Export the API's OpenAPI document to docs/api/openapi.json.
+openapi:
+    uv run python -c "import json; from nextmove.api.app import create_app; open('docs/api/openapi.json', 'w', encoding='utf-8').write(json.dumps(create_app().openapi(), indent=2, sort_keys=True) + '\n')"
+
+# Serve the API and the manager demo on http://127.0.0.1:8000 (demo at /demo, docs at /docs).
+serve profile="demo":
+    NEXTMOVE_PROFILE={{ trim_start_match(profile, "profile=") }} uv run uvicorn nextmove.api.app:create_app --factory --host 127.0.0.1 --port 8000
+
+# AC-12: coverage of the unit suite plus the decision-layer integration tests (the
+# simulation-budget suites are excluded: they measure memory and must not run under a tracer),
+# then the per-package gates (rules/decisions/evaluate >= 85%, overall >= 75%).
+coverage:
+    uv run pytest -q -p no:warnings --cov=nextmove --cov-report=json:coverage.json --cov-report=term tests/unit tests/golden/test_decision_golden.py tests/integration/test_train_stage.py tests/integration/test_evaluate_stage.py tests/integration/test_api.py tests/integration/test_mart.py tests/integration/test_overrides.py tests/integration/test_powerbi_kit.py
+    uv run python scripts/coverage_gate.py coverage.json
+
+# AC-11: after `just reproduce`, the regenerated published tables must equal the committed
+# ones byte for byte (runtime.json holds machine-dependent latency and is excluded).
+verify-published profile="demo":
+    git diff --exit-code --stat -- 'reports/{{ trim_start_match(profile, "profile=") }}/**/*.csv' 'reports/{{ trim_start_match(profile, "profile=") }}/**/*.json' ':(exclude)reports/**/runtime.json'

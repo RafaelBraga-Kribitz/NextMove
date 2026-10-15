@@ -1,0 +1,20 @@
+# Temporal design of the simulated evaluation (ADR-012). All results are in simulation only
+# (ADR-004). Windows are fractions of the profile's horizon:
+#   [warmup_days, train_end)       randomized A/B/n experiment -> model training
+#   [train_end, validation_end)    randomized A/B/n experiment -> calibration, model selection
+#   [validation_end, horizon)      held-out replay window every policy is compared on
+evaluation:
+  warmup_days: 14
+  train_end_fraction: 0.67
+  validation_end_fraction: 0.75
+  # The randomized experiment assigns an action every day to maximise training data; the
+  # policy replay decides once per week, the CRM cadence the action catalog assumes.
+  experiment_every_days: 1
+  replay_every_days: 7
+  bootstrap_resamples: 1000
+  ci_level: 0.95
+  seeds:
+    experiment: 7001
+    outcomes: 7002
+    bootstrap: 7003
+    models: 7004

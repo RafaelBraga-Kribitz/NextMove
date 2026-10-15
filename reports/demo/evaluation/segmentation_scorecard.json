@@ -1,0 +1,133 @@
+{
+  "candidates": {
+    "kmeans_k3": {
+      "criteria": {
+        "interpretability": 0.5,
+        "silhouette": 0.5012646477990575,
+        "size_balance": 0.8041091265402222,
+        "stability": 0.9706135480156061
+      },
+      "min_share": 0.14079147640791476,
+      "n_segments": 3,
+      "viable": true
+    },
+    "kmeans_k4": {
+      "criteria": {
+        "interpretability": 0.5,
+        "silhouette": 0.3985803802152827,
+        "size_balance": 0.9270305454182959,
+        "stability": 0.9769868734480054
+      },
+      "min_share": 0.1111111111111111,
+      "n_segments": 4,
+      "viable": true
+    },
+    "kmeans_k5": {
+      "criteria": {
+        "interpretability": 0.5,
+        "silhouette": 0.4257207306952777,
+        "size_balance": 0.9223127994480188,
+        "stability": 0.9646223891236028
+      },
+      "min_share": 0.0502283105022831,
+      "n_segments": 5,
+      "viable": true
+    },
+    "kmeans_k6": {
+      "criteria": {
+        "interpretability": 0.5,
+        "silhouette": 0.3547695089076878,
+        "size_balance": 0.9067860241560887,
+        "stability": 0.9304089762995946
+      },
+      "min_share": 0.0471841704718417,
+      "n_segments": 6,
+      "viable": false
+    },
+    "rfm_rules": {
+      "criteria": {
+        "interpretability": 1.0,
+        "silhouette": 0.15607027589803288,
+        "size_balance": 0.6991054474831653,
+        "stability": 0.9967326387847933
+      },
+      "min_share": 0.08599695585996955,
+      "n_segments": 4,
+      "viable": true
+    }
+  },
+  "chosen": "kmeans_k3",
+  "customers": 1314,
+  "ranking": [
+    "kmeans_k3",
+    "kmeans_k5",
+    "kmeans_k4",
+    "rfm_rules"
+  ],
+  "sensitivity": [
+    {
+      "criterion": "interpretability",
+      "weight_factor": 0.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "interpretability",
+      "weight_factor": 1.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "silhouette",
+      "weight_factor": 0.5,
+      "winner": "rfm_rules",
+      "winner_unchanged": false
+    },
+    {
+      "criterion": "silhouette",
+      "weight_factor": 1.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "size_balance",
+      "weight_factor": 0.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "size_balance",
+      "weight_factor": 1.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "stability",
+      "weight_factor": 0.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    },
+    {
+      "criterion": "stability",
+      "weight_factor": 1.5,
+      "winner": "kmeans_k3",
+      "winner_unchanged": true
+    }
+  ],
+  "topsis_closeness": {
+    "kmeans_k3": 0.632300400285661,
+    "kmeans_k4": 0.5312387227154138,
+    "kmeans_k5": 0.5676257428369264,
+    "rfm_rules": 0.3599310200364423
+  },
+  "viability": {
+    "max_segments": 6,
+    "min_segment_share": 0.05
+  },
+  "weights": {
+    "interpretability": 0.2,
+    "silhouette": 0.3,
+    "size_balance": 0.2,
+    "stability": 0.3
+  }
+}

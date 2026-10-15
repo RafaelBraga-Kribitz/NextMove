@@ -1,0 +1,6 @@
+rule,share,run_id
+discount_ceiling,1.000000,demo-f8fb25c032
+fatigue_penalty,0.988380,demo-f8fb25c032
+frequency_cap,0.641286,demo-f8fb25c032
+inventory_scarcity_gate,0.914795,demo-f8fb25c032
+margin_floor,0.488511,demo-f8fb25c032

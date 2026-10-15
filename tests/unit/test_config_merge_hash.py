@@ -6,6 +6,7 @@ repository's real `config/` tree (Task 3 in plan 01-03 owns that; see
 """
 
 import copy
+from pathlib import Path
 
 import pytest
 import yaml
@@ -120,9 +121,15 @@ autonomy:
   tier_3_human_only: [discount_ceiling_change]
 """
 
-# Constraints/actions/mcda/experiments are minimal — comment-only, populated by later
-# phases. `yaml.safe_load` on a comments-only file returns None, treated as `{}`.
-EMPTY_DOMAIN_YAML = "# populated by a later phase\n"
+# Constraints/actions/mcda/experiments carry required fields since the decision engine
+# landed (M-A); this merge/hash suite reuses the repository's own files for them rather than
+# duplicating their contents, so it still exercises a minimal simulator/features tree.
+_REPO_CONFIG = Path(__file__).resolve().parents[2] / "config"
+LATER_DOMAIN_YAML = {
+    name: (_REPO_CONFIG / f"{name}.yaml").read_text(encoding="utf-8")
+    for name in BASE_DOMAIN_FILES
+    if name not in ("simulator", "features", "data_quality", "autonomy")
+}
 
 
 def _write_domain_files(config_dir) -> None:
@@ -130,10 +137,8 @@ def _write_domain_files(config_dir) -> None:
     (config_dir / "simulator.yaml").write_text(SIMULATOR_YAML)
     (config_dir / "features.yaml").write_text(FEATURES_YAML)
     (config_dir / "data_quality.yaml").write_text(DATA_QUALITY_YAML)
-    (config_dir / "constraints.yaml").write_text(EMPTY_DOMAIN_YAML)
-    (config_dir / "actions.yaml").write_text(EMPTY_DOMAIN_YAML)
-    (config_dir / "mcda.yaml").write_text(EMPTY_DOMAIN_YAML)
-    (config_dir / "experiments.yaml").write_text(EMPTY_DOMAIN_YAML)
+    for name, text in LATER_DOMAIN_YAML.items():
+        (config_dir / f"{name}.yaml").write_text(text)
     (config_dir / "autonomy.yaml").write_text(AUTONOMY_YAML)
     profiles_dir = config_dir / "profiles"
     profiles_dir.mkdir(exist_ok=True)
@@ -150,9 +155,9 @@ def config_tree(tmp_path):
 # A full valid Config-shaped dict, built directly in Python (not via YAML), for the
 # dict-level key-order test below.
 def _valid_config_dict() -> dict:
-    return yaml.safe_load(SIMULATOR_YAML + FEATURES_YAML + DATA_QUALITY_YAML + AUTONOMY_YAML) | {
-        "profile": "base"
-    }
+    later = "".join(LATER_DOMAIN_YAML.values())
+    base = SIMULATOR_YAML + FEATURES_YAML + DATA_QUALITY_YAML + AUTONOMY_YAML
+    return (yaml.safe_load(base + later) or {}) | {"profile": "base"}
 
 
 # ---------------------------------------------------------------------------------------
@@ -262,7 +267,8 @@ def test_config_hash_is_64_char_lowercase_hex(config_tree) -> None:
 def test_load_config_returns_source_files_including_profile(config_tree) -> None:
     resolved = load_config("base", config_dir=config_tree)
     assert (config_tree / "profiles" / "base.yaml") in resolved.source_files
-    assert len(resolved.source_files) == 9  # eight base domain files + one profile overlay
+    # every base domain file + one profile overlay
+    assert len(resolved.source_files) == len(BASE_DOMAIN_FILES) + 1
 
 
 def test_profile_path_traversal_is_rejected_not_read_outside_config_dir(config_tree) -> None:

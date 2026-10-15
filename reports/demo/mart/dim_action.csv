@@ -1,0 +1,12 @@
+action_key,candidate_id,archetype,description,is_contact,cost_cents,discount_bps,is_restraint,is_discount
+1,none,none,Do nothing this cycle.,false,0,0,true,false
+2,wait,wait,Hold any contact and re-evaluate after the wait window.,false,0,0,true,false
+3,recommend__top_seller,recommend,Personalised product recommendation in the next session.,true,5,0,false,false
+4,recommend__affinity,recommend,Personalised product recommendation in the next session.,true,5,0,false,false
+5,bundle,bundle,"Premium bundle offer by email, no price reduction.",true,10,0,false,false
+6,discount_low__500bps,discount_low,Small discount code.,true,10,500,false,true
+7,discount_low__1000bps,discount_low,Small discount code.,true,10,1000,false,true
+8,discount_high__2000bps,discount_high,Large discount code.,true,10,2000,false,true
+9,discount_high__3000bps,discount_high,Large discount code.,true,10,3000,false,true
+10,email_now,email_now,Content email sent immediately.,true,5,0,false,false
+11,email_delayed,email_delayed,Content email sent in the customer's usual engagement window.,true,5,0,false,false

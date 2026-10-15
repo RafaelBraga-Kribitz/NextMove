@@ -1,0 +1,32 @@
+{
+  "config_hash": "7c4d3f8e1510c624d1b2e6df0aa5666442ed379c51cf81b11786d8547318e2b6",
+  "customers": 1983,
+  "ml_policy": "expected_value_gbm",
+  "model_versions": {
+    "gbm": "gbm-175a0d71539f",
+    "logistic": "logistic-490a615c10dd"
+  },
+  "profile": "demo",
+  "run_id": "demo-f8fb25c032",
+  "selected_family": "gbm",
+  "start_date": "2024-01-01",
+  "test_days": 20,
+  "validation_profit_eur": {
+    "gbm": 6446.915,
+    "logistic": 6430.1325
+  },
+  "windows": {
+    "test": [
+      411,
+      548
+    ],
+    "train": [
+      14,
+      367
+    ],
+    "validation": [
+      367,
+      411
+    ]
+  }
+}

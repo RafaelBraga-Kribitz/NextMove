@@ -28,24 +28,35 @@ STAGING_DIRNAME = "_staging"
 
 
 class Zone(StrEnum):
-    """The five lineage-bearing, DVC-declarable data zones. Exactly five members -- staging
-    is never a sixth."""
+    """The lineage-bearing, DVC-declarable data zones. Phase 1 shipped the first five; the
+    decision layer (M-B onward) adds one zone per downstream stage. Staging is never a zone."""
 
     RAW = "raw"
     CANONICAL = "canonical"
     FEATURES = "features"
     GROUND_TRUTH = "ground_truth"
     LINEAGE = "lineage"
+    EXPERIMENT = "experiment"
+    MODELS = "models"
+    EVALUATION = "evaluation"
+    MART = "mart"
+    #: Operator input (UC1 overrides): append-only, never a DVC out, so a pipeline rerun can
+    #: never erase a human decision.
+    OVERRIDES = "overrides"
 
 
 class Stage(StrEnum):
-    """The three pipeline stages -- also the three lineage fragment filenames
-    (`data/lineage/{stage}.parquet`) and the three `dvc.yaml` stage names (plan 01-11). One
-    enum keeps those three lists provably identical instead of coincidentally equal."""
+    """The pipeline stages -- also the lineage fragment filenames
+    (`data/lineage/{stage}.parquet`) and the `dvc.yaml` stage names (plan 01-11). One enum
+    keeps those lists provably identical instead of coincidentally equal."""
 
     SIMULATE = "simulate"
     INGEST = "ingest"
     FEATURES = "features"
+    EXPERIMENT = "experiment"
+    TRAIN = "train"
+    EVALUATE = "evaluate"
+    MART = "mart"
 
 
 def resolve_table_path(name: str, zone: Zone, root: Path | None = None) -> Path:
@@ -88,4 +99,14 @@ def resolve_staging_path(part_dir: str, part_index: int, root: Path | None = Non
             "refusing to write it"
         )
     candidate.parent.mkdir(parents=True, exist_ok=True)
+    return candidate
+
+
+def resolve_artifact_path(filename: str, zone: Zone, root: Path | None = None) -> Path:
+    """Resolve a non-table artifact (a pickled model, a JSON scorecard) inside `zone`, with
+    the same containment check as `resolve_table_path`."""
+    zone_dir = ((root if root is not None else DATA_ROOT) / zone.value).resolve()
+    candidate = (zone_dir / filename).resolve()
+    if not candidate.is_relative_to(zone_dir) or candidate == zone_dir:
+        raise ValueError(f"artifact {filename!r} resolves outside zone {zone.value!r}")
     return candidate

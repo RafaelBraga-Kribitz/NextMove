@@ -1,0 +1,8 @@
+policy_key,policy,policy_label,is_ml_policy,is_reference_only
+1,always_discount,Always discount,false,false
+2,do_nothing,Do nothing,false,false
+3,expected_value_gbm,Decision engine (GBM),true,false
+4,expected_value_logistic,Decision engine (logistic),false,false
+5,oracle_upper_bound,"Hindsight oracle (upper bound, not deployable)",false,true
+6,rules_only,Rules-only playbook,false,false
+7,top_seller,Top-seller recommendation,false,false

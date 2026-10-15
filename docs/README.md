@@ -20,9 +20,26 @@ resolves each file back to its original authoring commits.
 | [QUALITY_BAR.md](QUALITY_BAR.md) | Acceptance criteria, anti-patterns, technical debt policy, documentation standards | Yes — Phase 1 |
 | [OPEN_DECISIONS.md](OPEN_DECISIONS.md) | OD-1 through OD-10 — the open decisions ratified as ADRs below | Yes — Phase 1 |
 
+## Delivery, evaluation and operations documents
+
+| Document | Purpose |
+|----------|---------|
+| [MILESTONES.md](MILESTONES.md) | The finish-and-polish plan (ADR-011) and the explicit "Later" list |
+| [STATUS_LOG.md](STATUS_LOG.md) | Item-by-item progress log |
+| [ACCEPTANCE_MATRIX.md](ACCEPTANCE_MATRIX.md) | AC-1 … AC-14 mapped to the test or artifact that proves each |
+| [EXPLANATION_STYLE_GUIDE.md](EXPLANATION_STYLE_GUIDE.md) | Rules for the manager-readable `reasoning` paragraph |
+| [RUNBOOK.md](RUNBOOK.md) | How to run, check and troubleshoot the pipeline |
+| [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | The 5-minute UC1 walkthrough |
+| [api/decision.schema.json](api/decision.schema.json), [api/openapi.json](api/openapi.json) | Public contract and API reference |
+| [../reports/demo/evaluation/evaluation_report.md](../reports/demo/evaluation/evaluation_report.md) | Three-axis evaluation report (simulated) |
+| [../reports/demo/evaluation/model_cards/](../reports/demo/evaluation/model_cards/) | Model cards |
+| [../reporting/powerbi/README.md](../reporting/powerbi/README.md) | Power BI build kit |
+| [../DEBT.md](../DEBT.md) | Technical debt register |
+
 ## Architecture Decision Records
 
-Each ADR ratifies one open decision (OD-1 through OD-10) per DOC-01. All ten are individually
+ADR-001 … ADR-010 each ratify one open decision (OD-1 through OD-10) per DOC-01; ADR-011 and
+ADR-012 record the delivery scope and the evaluation design. All are individually
 written with genuine Context / Decision / Consequences reasoning — see `tests/unit/test_adr_structure.py`
 for the structural floor every ADR must clear.
 
@@ -38,3 +55,5 @@ for the structural floor every ADR must clear.
 | [008-static-3wd-thresholds.md](adr/008-static-3wd-thresholds.md) | OD-8 | Static 3WD thresholds in MVP, with the threshold interface designed for dynamism |
 | [009-three-tier-autonomy.md](adr/009-three-tier-autonomy.md) | OD-9 | Three-tier autonomy (auto-apply / human sign-off / human-only), tiers in `config/autonomy.yaml` |
 | [010-fixed-action-archetype-catalog.md](adr/010-fixed-action-archetype-catalog.md) | OD-10 | MVP fixes ~8 action archetypes with small parameter grids; `ActionProvider` registry is the escape hatch |
+| [011-portfolio-scope-for-hiring-market.md](adr/011-portfolio-scope-for-hiring-market.md) | — | Finish a thin vertical slice; SQL mart and Power BI kit; weak spots measured openly |
+| [012-simulated-evaluation-design.md](adr/012-simulated-evaluation-design.md) | — | Randomized experiment, outcome oracle, common random numbers, temporal windows, `demo` as published profile |

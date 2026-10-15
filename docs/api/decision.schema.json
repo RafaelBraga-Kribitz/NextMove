@@ -1,0 +1,425 @@
+{
+  "$defs": {
+    "ActionChoice": {
+      "additionalProperties": false,
+      "description": "The chosen action: its catalog archetype, the concrete candidate id, and its params.",
+      "properties": {
+        "candidate_id": {
+          "description": "Concrete parameterized candidate.",
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        },
+        "type": {
+          "description": "Action archetype from the action catalog.",
+          "minLength": 1,
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "candidate_id"
+      ],
+      "title": "ActionChoice",
+      "type": "object"
+    },
+    "Attribution": {
+      "additionalProperties": false,
+      "description": "One feature's signed contribution to the chosen action's predicted response.",
+      "properties": {
+        "feature": {
+          "minLength": 1,
+          "title": "Feature",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "feature",
+        "weight"
+      ],
+      "title": "Attribution",
+      "type": "object"
+    },
+    "CandidateScore": {
+      "additionalProperties": false,
+      "description": "The score breakdown for one surviving candidate.",
+      "properties": {
+        "cost_cents": {
+          "title": "Cost Cents",
+          "type": "number"
+        },
+        "risk_penalty_cents": {
+          "title": "Risk Penalty Cents",
+          "type": "number"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "uplift": {
+          "title": "Uplift",
+          "type": "number"
+        },
+        "value_cents": {
+          "title": "Value Cents",
+          "type": "number"
+        }
+      },
+      "required": [
+        "score",
+        "uplift",
+        "value_cents",
+        "cost_cents",
+        "risk_penalty_cents"
+      ],
+      "title": "CandidateScore",
+      "type": "object"
+    },
+    "ExpectedOutcome": {
+      "additionalProperties": false,
+      "description": "Expected incremental effect of the chosen action versus doing nothing.",
+      "properties": {
+        "estimate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Point estimate; null only with a stated reason.",
+          "title": "Estimate"
+        },
+        "expected_profit_cents": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected incremental profit in cents versus `none`.",
+          "title": "Expected Profit Cents"
+        },
+        "horizon_days": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "interval": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Uncertainty interval [low, high]; null only with a stated reason.",
+          "title": "Interval"
+        },
+        "metric": {
+          "const": "conversion_uplift",
+          "default": "conversion_uplift",
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "estimate",
+        "interval",
+        "horizon_days"
+      ],
+      "title": "ExpectedOutcome",
+      "type": "object"
+    },
+    "FilteredCandidate": {
+      "additionalProperties": false,
+      "description": "A candidate removed by a hard constraint, and why.",
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "detail": {
+          "minLength": 1,
+          "title": "Detail",
+          "type": "string"
+        },
+        "rule": {
+          "minLength": 1,
+          "title": "Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "rule",
+        "detail"
+      ],
+      "title": "FilteredCandidate",
+      "type": "object"
+    },
+    "PolicyInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "config_hash": {
+          "minLength": 1,
+          "title": "Config Hash",
+          "type": "string"
+        },
+        "model_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Model Versions",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "config_hash"
+      ],
+      "title": "PolicyInfo",
+      "type": "object"
+    },
+    "ReasoningTrace": {
+      "additionalProperties": false,
+      "description": "Structured, replayable trace behind `reasoning` (AC-4).",
+      "properties": {
+        "candidates_considered": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Candidates Considered",
+          "type": "array"
+        },
+        "filtered": {
+          "items": {
+            "$ref": "#/$defs/FilteredCandidate"
+          },
+          "title": "Filtered",
+          "type": "array"
+        },
+        "fired_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fired Rules",
+          "type": "array"
+        },
+        "model_attributions": {
+          "items": {
+            "$ref": "#/$defs/Attribution"
+          },
+          "title": "Model Attributions",
+          "type": "array"
+        },
+        "runner_up": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunnerUp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runner_up_unavailable_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runner Up Unavailable Reason"
+        },
+        "scores": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CandidateScore"
+          },
+          "title": "Scores",
+          "type": "object"
+        }
+      },
+      "required": [
+        "candidates_considered",
+        "scores",
+        "runner_up"
+      ],
+      "title": "ReasoningTrace",
+      "type": "object"
+    },
+    "RunnerUp": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "score_gap": {
+          "minimum": 0.0,
+          "title": "Score Gap",
+          "type": "number"
+        }
+      },
+      "required": [
+        "action",
+        "score_gap"
+      ],
+      "title": "RunnerUp",
+      "type": "object"
+    }
+  },
+  "$id": "https://nextmove.local/schemas/decision/1.0.0",
+  "additionalProperties": false,
+  "description": "One next-best-action decision for one customer at one point in time.",
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/ActionChoice"
+    },
+    "as_of": {
+      "format": "date-time",
+      "title": "As Of",
+      "type": "string"
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Confidence"
+    },
+    "constraints_considered": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraints Considered",
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "title": "Customer Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "minLength": 1,
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "expected_outcome": {
+      "$ref": "#/$defs/ExpectedOutcome"
+    },
+    "needs_human_review": {
+      "default": false,
+      "title": "Needs Human Review",
+      "type": "boolean"
+    },
+    "policy": {
+      "$ref": "#/$defs/PolicyInfo"
+    },
+    "reasoning": {
+      "minLength": 1,
+      "title": "Reasoning",
+      "type": "string"
+    },
+    "reasoning_trace": {
+      "$ref": "#/$defs/ReasoningTrace"
+    },
+    "review_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Reason"
+    },
+    "unavailable": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Field path -> reason, for every nullable field that is null.",
+      "title": "Unavailable",
+      "type": "object"
+    }
+  },
+  "required": [
+    "decision_id",
+    "customer_id",
+    "as_of",
+    "action",
+    "expected_outcome",
+    "confidence",
+    "reasoning",
+    "reasoning_trace",
+    "constraints_considered",
+    "policy"
+  ],
+  "title": "Decision",
+  "type": "object"
+}

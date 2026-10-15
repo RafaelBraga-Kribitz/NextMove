@@ -1,0 +1,27 @@
+# Policy settings. `baselines` configure the comparison policies of AC-10; every policy, the
+# baselines included, chooses only among candidates that survived the hard constraints.
+policies:
+  baselines:
+    top_seller_candidate: recommend__top_seller
+    # Hand-written CRM playbook ("rules-only"), the strongest non-learned baseline:
+    #   1. items in cart and a history of buying on discount -> small discount
+    #   2. otherwise, an engaged browser -> affinity recommendation
+    #   3. otherwise, a lapsing customer -> win-back email in their usual window
+    #   4. otherwise -> do nothing
+    rules_only:
+      cart_units_min: 1
+      price_sensitivity_proxy_min: 0.25
+      discount_candidate: discount_low__1000bps
+      engaged_sessions_min: 4
+      engaged_candidate: recommend__affinity
+      lapsed_recency_days_min: 60
+      lapsed_candidate: email_delayed
+  # Expected-value policy (C1): score = E[incremental profit vs none] - soft penalties
+  #   - risk_aversion * sd(incremental profit across the model ensemble), all in cents.
+  expected_value:
+    family: auto            # auto = the family selected on the validation-window replay
+    risk_aversion: 1.0
+    # Below this confidence (share of ensemble members that rank the choice first), the
+    # engine falls back to the safe default `none` and says so in the explanation.
+    min_confidence: 0.5
+    interval_quantiles: [0.1, 0.9]

@@ -1,0 +1,3 @@
+check_name,stage,failing_rows,checked_rows,failing_share,threshold,passed
+gate:monotonic_session_timestamps,semantic,170,986723,0.000172,,
+reject_rate,all,170,986723,0.000172,0.001,true
