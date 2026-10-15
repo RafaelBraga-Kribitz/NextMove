@@ -7,7 +7,7 @@
 [![Status: In development](https://img.shields.io/badge/status-In%20development-yellow)](#status)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-**Status:** In development · the scoped release (ADR-011) is built and evaluated in simulation; final release checks are open
+**Status:** In development · the scoped release (ADR-011) is built and evaluated in simulation only
 
 A next-best-action engine for e-commerce CRM that knows when to do nothing.
 
@@ -205,7 +205,7 @@ CI runs the same checks plus the miniature `ci` profile end to end. Operations:
 
 ## Status
 
-**Status:** In development · 2026-10-14 · milestones M-A to M-F in [`docs/STATUS_LOG.md`](docs/STATUS_LOG.md)
+**Status:** In development · 2026-10-15 · milestones M-A to M-F complete in [`docs/STATUS_LOG.md`](docs/STATUS_LOG.md)
 
 The scoped release (ADR-011) is built and evaluated **in simulation only**. What does not exist
 yet: results on real customer data, dynamic 3WD thresholds, dedicated uplift learners,
