@@ -110,3 +110,5 @@ Human-only items: build the `.pbix` from `reporting/powerbi/`; update the NextMo
 contract check stays red until then, and the hero banner text follows the descriptor); decide
 repository visibility and pinning; GitHub description/topics and a LinkedIn post (aggregate
 numbers only); run `just reproduce` on your own machine (and Windows if relevant).
+- **2026-10-15** — README status aligned with the portfolio registry, which the owner set to
+  `In development` (braga-portfolio-docs#7); the README contract audit passes in full.
