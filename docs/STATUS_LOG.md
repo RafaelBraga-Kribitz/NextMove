@@ -36,7 +36,7 @@ commit that completes it.
 
 ### M-F — Engineering and docs
 - [x] F1 Clean-clone reproduce (AC-11)
-- [ ] F2 Coverage gates (AC-12)
+- [x] F2 Coverage gates (AC-12)
 - [x] F3 Runbook, model cards, OpenAPI export, assumption log
 - [x] F4 README rewrite, docs index, ADR table
 
@@ -81,3 +81,32 @@ commit that completes it.
 - **2026-10-14** — F1 (AC-11): fresh clone of `portfolio-grade` at 4d1c634 → `uv sync` →
   `just reproduce` (all seven stages, 14m51s) → run `demo-f8fb25c032` → `just
   verify-published` reported no diff in any published CSV/JSON (`VERIFY_PUBLISHED_OK`).
+- **2026-10-15** — F2 (AC-12): CI run 39/40 on 99c4e44 green including the coverage gate
+  step; PR #4 merged by the author. All checklist items ticked.
+
+## Final report (Definition of Done)
+
+| DoD | Evidence |
+|---|---|
+| 1 `just ci` green; clean-clone `just reproduce` | CI runs 39/40 green on 99c4e44; clean clone → `just reproduce` → `just verify-published` = no diff |
+| 2 AC-1…AC-14 mapped | [`ACCEPTANCE_MATRIX.md`](ACCEPTANCE_MATRIX.md) |
+| 3 Policy comparison, one command, honest GBM verdict | `reports/demo/evaluation/policy_comparison.{csv,png}`; GBM beats rules-only, ties do-nothing (stated) |
+| 4 Three-axis report, failure analysis, uplift error, model cards | `reports/demo/evaluation/evaluation_report.md`, `uplift_error.csv`, `model_cards/` |
+| 5 Mart + SQL tests + DQ report; Power BI kit | `sql/`, `reports/demo/mart/` (incl. `data_quality.md`), `reporting/powerbi/` |
+| 6 UC1 via demo; screenshots | `/demo`, `test_ac14_demo_walkthrough`, `docs/assets/demo_*.png` |
+| 7 ADR-011, no unreviewed TODO, DEBT current | ADR-011/012; `DEBT.md` (DEBT-001…005) |
+| 8 README numbers trace to run id, simulated | run `demo-f8fb25c032`; `tests/unit/test_readme_numbers.py` |
+| 9 Coverage gates; no secrets/personal/scraped data | CI coverage step; only simulated data and the author's own contact block |
+| 10 Every item ticked, final report | this file |
+
+Key results (simulation only, run `demo-f8fb25c032`): engine vs rules-only +€2,909
+[€2,785, €3,042] (3WD Accept, needs sign-off); engine vs do-nothing tie (Reject, in margin);
+hindsight ceiling +€44; always-discount −€465 with 92% of redeemed discounts wasted; models
+calibrated (test ECE ≤ 0.01) but weak (AUC ≈ 0.51–0.53); uplift sign right 88–96% of the time
+but shrunk towards zero (−0.8 pp predicted vs −2.4 pp true).
+
+Human-only items: build the `.pbix` from `reporting/powerbi/`; update the NextMove entry in
+`braga-portfolio-docs/manifest/portfolio.yaml` (status, `incomplete`, descriptor — the README
+contract check stays red until then, and the hero banner text follows the descriptor); decide
+repository visibility and pinning; GitHub description/topics and a LinkedIn post (aggregate
+numbers only); run `just reproduce` on your own machine (and Windows if relevant).
