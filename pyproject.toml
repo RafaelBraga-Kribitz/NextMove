@@ -16,7 +16,7 @@ dependencies = [
     "fastapi>=0.120,<1",
     "uvicorn>=0.38,<1",
     "matplotlib>=3.10,<4",
-    "bk-viz @ git+https://github.com/RafaelBraga-Kribitz/bk-viz@f4f90b2c76b8fed4f27caa9b29282336d779a3da",
+    "bk-viz @ git+https://github.com/RafaelBraga-Kribitz/bk-viz@fe8125a3043f49a798ef24740b23f81c46863562",
     "python-multipart>=0.0.20,<1",
 ]
 
