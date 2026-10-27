@@ -3,9 +3,9 @@
 ![NextMove — a headless behavioural decision engine for e-commerce next-best-action](docs/assets/hero.png)
 
 [![CI](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/NextMove/actions/workflows/ci.yml)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/)
-[![Status: In development](https://img.shields.io/badge/status-In%20development-yellow)](#status)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-5A5C61?labelColor=26282C)](https://www.python.org/downloads/release/python-3120/)
+[![Status: In development](https://img.shields.io/badge/status-In%20development-5A5C61?labelColor=26282C)](#status)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-5A5C61?labelColor=26282C)](LICENSE)
 
 **Status:** In development · the scoped release (ADR-011) is built and evaluated in simulation only
 
@@ -21,8 +21,10 @@ always-discount saw redeemed went to customers who would have bought anyway.
 
 ![Policy comparison: expected profit versus doing nothing, by policy, with 95% intervals (simulated data)](reports/demo/evaluation/policy_comparison.png)
 
-**The number:** **+€2,909** expected profit for the decision engine versus the rules-only
-playbook (95% CI €2,785 to €3,042), 1,983 simulated customers, 20 weekly decision rounds,
+**The number:** the weekly rules-based playbook loses €2,909 of expected profit against doing
+nothing, and the decision engine avoids that loss: **+€2,909** versus the rules-only playbook
+(95% CI €2,785 to €3,042). The engine does not beat doing nothing (€0; it contacts almost no
+one), so its value here is restraint, not extra revenue. 1,983 simulated customers, 20 weekly decision rounds,
 run `demo-f8fb25c032`. **In simulation only** (ADR-004): no real customers, revenue or
 production use.
 
@@ -67,6 +69,7 @@ this repository.
 ## Method
 
 ```mermaid
+%%{init: {"theme":"base","fontFamily":"BKribitz, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif","themeVariables":{"background":"#E4E6EA","primaryColor":"#DCDEE2","primaryTextColor":"#26282C","primaryBorderColor":"#26282C","secondaryColor":"#E4E6EA","secondaryTextColor":"#26282C","secondaryBorderColor":"#5A5C61","tertiaryColor":"#E4E6EA","tertiaryTextColor":"#26282C","tertiaryBorderColor":"#C2C4CA","lineColor":"#5A5C61","textColor":"#26282C","mainBkg":"#DCDEE2","nodeBorder":"#26282C","clusterBkg":"#E4E6EA","clusterBorder":"#C2C4CA","edgeLabelBackground":"#E4E6EA","titleColor":"#26282C","fontFamily":"BKribitz, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"14px"},"flowchart":{"curve":"linear","htmlLabels":true,"padding":8}}}%%
 flowchart LR
     sim[Simulator] --> ingest[Ingest + DQ gates]
     ingest --> feat[Point-in-time features]
