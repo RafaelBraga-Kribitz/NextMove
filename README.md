@@ -21,8 +21,10 @@ always-discount saw redeemed went to customers who would have bought anyway.
 
 ![Policy comparison: expected profit versus doing nothing, by policy, with 95% intervals (simulated data)](reports/demo/evaluation/policy_comparison.png)
 
-**The number:** **+€2,909** expected profit for the decision engine versus the rules-only
-playbook (95% CI €2,785 to €3,042), 1,983 simulated customers, 20 weekly decision rounds,
+**The number:** the weekly rules-based playbook loses €2,909 of expected profit against doing
+nothing, and the decision engine avoids that loss: **+€2,909** versus the rules-only playbook
+(95% CI €2,785 to €3,042). The engine does not beat doing nothing (€0; it contacts almost no
+one), so its value here is restraint, not extra revenue. 1,983 simulated customers, 20 weekly decision rounds,
 run `demo-f8fb25c032`. **In simulation only** (ADR-004): no real customers, revenue or
 production use.
 
