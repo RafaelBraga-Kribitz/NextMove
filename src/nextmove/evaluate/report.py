@@ -14,9 +14,11 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import bk_theme as bk  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
+from matplotlib.ticker import FuncFormatter  # noqa: E402
 
 from nextmove.config.loader import ResolvedConfig  # noqa: E402
 from nextmove.models.features import context_feature_names  # noqa: E402
@@ -30,39 +32,43 @@ CAVEAT = (
     "simulator (ADR-004); none describes real customers, revenue or production use."
 )
 
-# Reference palette (dataviz skill): one highlight hue for the engine, neutral for the rest.
-_SURFACE = "#fcfcfb"
-_TEXT = "#0b0b0b"
-_TEXT_2 = "#52514e"
-_GRID = "#e4e3df"
-_HIGHLIGHT = "#2a78d6"
-_NEUTRAL = "#9a9890"
-_REFERENCE = "#c9c7c0"
+# Figures follow the Braga design system v2.1 through bk-viz (`bk_theme`): colours come only
+# from its roles (one highlight `hl` for the engine, structure greys for the rest), labels are
+# ink / ink-2, type is BKribitz, and every figure carries a provenance footer. No hex here.
+_FIG_NOTE = "In simulation only (ADR-004)."
 
 
 def _csv(frame: pd.DataFrame, path: Path) -> None:
     path.write_text(frame.to_csv(index=False, float_format="%.6f", lineterminator="\n"), "utf-8")
 
 
-def _style(ax) -> None:
-    ax.set_facecolor(_SURFACE)
-    for side in ("top", "right", "left"):
-        ax.spines[side].set_visible(False)
-    ax.spines["bottom"].set_color(_GRID)
-    ax.tick_params(colors=_TEXT_2, labelsize=9)
-    ax.grid(axis="x", color=_GRID, linewidth=0.8)
-    ax.set_axisbelow(True)
+def _save(fig, path: Path) -> None:
+    # Saved directly (not bk.save) to keep the one PNG at its published path and to drop the
+    # matplotlib version from the PNG metadata, so a rerun stays byte-stable.
+    bk.check_glyphs(fig)
+    fig.savefig(path, facecolor=bk.c("surface"), metadata={"Software": None})
+    plt.close(fig)
 
 
 def _policy_chart(summary: pd.DataFrame, run_id: str, path: Path) -> None:
+    bk.apply("light")
     data = summary[summary["policy"] != "do_nothing"].copy()
     data = data.sort_values("vs_do_nothing_eur")
-    fig, ax = plt.subplots(figsize=(8.6, 4.2), dpi=150)
-    fig.patch.set_facecolor(_SURFACE)
-    _style(ax)
+    fig, ax = bk.decision_panel(
+        finding="Policy comparison — simulated data",
+        context="Expected profit vs. doing nothing over the test window (€, 95% CI)",
+        cols=12,
+        rows=6,
+        left=0.36,
+        right=0.03,
+        bottom=0.2,
+    )
     y = np.arange(len(data))
+    # The one highlight is the engine's own policy; the hindsight oracle is a light reference
+    # grey (not deployable); every other policy is structure grey.
+    reference = bk.neutral_ramp(4)[3]
     colors = [
-        _HIGHLIGHT if ml else (_REFERENCE if p == "oracle_upper_bound" else _NEUTRAL)
+        bk.c("hl") if ml else (reference if p == "oracle_upper_bound" else bk.c("sc-ac"))
         for p, ml in zip(data["policy"], data["is_ml_policy"], strict=True)
     ]
     values = data["vs_do_nothing_eur"].to_numpy()
@@ -70,49 +76,62 @@ def _policy_chart(summary: pd.DataFrame, run_id: str, path: Path) -> None:
     high = data["vs_do_nothing_ci_high_eur"].to_numpy() - values
     ax.barh(y, values, height=0.55, color=colors, zorder=2)
     ax.errorbar(
-        values, y, xerr=[low, high], fmt="none", ecolor=_TEXT, elinewidth=1.2, capsize=3, zorder=3
+        values, y, xerr=[low, high], fmt="none", ecolor=bk.c("ink"), elinewidth=1.2, zorder=3
     )
-    ax.axvline(0, color=_TEXT_2, linewidth=1)
-    ax.set_yticks(y, data["label"], color=_TEXT)
+    ax.axvline(0, color=bk.c("ink"), linewidth=1, zorder=3)
+    ax.set_yticks(y, data["label"])
+    ax.grid(axis="x")
+    ax.grid(axis="y", visible=False)
     span = max(
         np.abs(data["vs_do_nothing_ci_low_eur"]).max(),
         np.abs(data["vs_do_nothing_ci_high_eur"]).max(),
     )
     for yi, v, hi in zip(y, values, data["vs_do_nothing_ci_high_eur"], strict=True):
         ax.text(
-            max(v, hi, 0) + span * 0.03, yi, f"€{v:,.0f}", va="center", fontsize=9, color=_TEXT_2
+            max(v, hi, 0) + span * 0.03,
+            yi,
+            bk.variance_label(_fmt_eur(v), round(float(v))),
+            va="center",
+            color=bk.c("ink"),
+            fontproperties=bk.font("mono", "semibold", "mono"),
         )
     right = max(float(data["vs_do_nothing_ci_high_eur"].max()), 0.0)
     ax.set_xlim(
         min(-span * 0.05, data["vs_do_nothing_ci_low_eur"].min() * 1.1), right + span * 0.25
     )
-    ax.set_xlabel(
-        "Expected profit vs. doing nothing over the test window (€, 95% CI)",
-        color=_TEXT_2,
-        fontsize=9,
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: _fmt_eur(v)))
+    bk.strip_chrome(ax, keep=("bottom",))
+    bk.footer(
+        fig,
+        source="policy_comparison.csv",
+        run_id=run_id,
+        tag="SIMULATED",
+        note=_FIG_NOTE,
+        left=0.36,
+        right=0.03,
+        y=0.075,
     )
-    ax.set_title(
-        "Policy comparison — simulated data",
-        loc="left",
-        color=_TEXT,
-        fontsize=12,
-        fontweight="bold",
-    )
-    fig.text(0.01, 0.01, f"Run {run_id} · in simulation only (ADR-004)", color=_TEXT_2, fontsize=7)
-    fig.tight_layout(rect=(0, 0.03, 1, 1))
-    fig.savefig(path, facecolor=_SURFACE, metadata={"Software": None})
-    plt.close(fig)
+    _save(fig, path)
 
 
 def _reliability_chart(reliability: pd.DataFrame, run_id: str, path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(5.2, 4.2), dpi=150)
-    fig.patch.set_facecolor(_SURFACE)
-    _style(ax)
-    ax.grid(axis="both", color=_GRID, linewidth=0.8)
+    bk.apply("light", grid="both")
+    fig, ax = bk.decision_panel(
+        finding="Calibration, test window — simulated",
+        context="Observed purchase rate by bin of mean predicted probability",
+        cols=8,
+        rows=7,
+        left=0.15,
+        right=0.14,
+        bottom=0.24,
+    )
     test = reliability[reliability["split"] == "test"]
     top = float(max(test["bin_mean_predicted"].max(), test["bin_observed_rate"].max()) * 1.1)
-    ax.plot([0, top], [0, top], color=_TEXT_2, linewidth=1, linestyle="--", label="Perfect")
-    for family, color in (("logistic", _NEUTRAL), ("gbm", _HIGHLIGHT)):
+    ax.plot([0, top], [0, top], color=bk.c("mid"), linewidth=1, linestyle="--")
+    bk.direct_label(ax, top, top, "Perfect", color=bk.c("ink-2"), dx=-4, dy=6, ha="right")
+    # One highlight: the GBM family; logistic is structure grey. Lines are labelled at their
+    # last point instead of a legend.
+    for family, color in (("logistic", bk.c("sc-ac")), ("gbm", bk.c("hl"))):
         part = test[test["family"] == family]
         ax.plot(
             part["bin_mean_predicted"],
@@ -121,22 +140,25 @@ def _reliability_chart(reliability: pd.DataFrame, run_id: str, path: Path) -> No
             markersize=4,
             linewidth=2,
             color=color,
-            label=family,
         )
-    ax.set_xlabel("Mean predicted purchase probability", color=_TEXT_2, fontsize=9)
-    ax.set_ylabel("Observed purchase rate", color=_TEXT_2, fontsize=9)
-    ax.set_title(
-        "Calibration, test window — simulated",
-        loc="left",
-        color=_TEXT,
-        fontsize=11,
-        fontweight="bold",
+        last = part.sort_values("bin_mean_predicted").iloc[-1]
+        bk.direct_label(ax, last["bin_mean_predicted"], last["bin_observed_rate"], family)
+    bk.pct_axis(ax, axis="x", decimals=0)
+    bk.pct_axis(ax, axis="y", decimals=0)
+    ax.set_xlabel("Mean predicted purchase probability")
+    ax.set_ylabel("Observed purchase rate")
+    bk.strip_chrome(ax)
+    bk.footer(
+        fig,
+        source="reliability.csv",
+        run_id=run_id,
+        tag="SIMULATED",
+        note=_FIG_NOTE,
+        left=0.15,
+        right=0.14,
+        y=0.075,
     )
-    ax.legend(frameon=False, fontsize=8, labelcolor=_TEXT_2)
-    fig.text(0.01, 0.01, f"Run {run_id}", color=_TEXT_2, fontsize=7)
-    fig.tight_layout(rect=(0, 0.03, 1, 1))
-    fig.savefig(path, facecolor=_SURFACE, metadata={"Software": None})
-    plt.close(fig)
+    _save(fig, path)
 
 
 def _fmt_eur(value: float) -> str:

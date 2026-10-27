@@ -7,7 +7,7 @@ on:
 jobs:
   checks:
     name: checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ubuntu-26.04 runners hit a /tmp disk quota when DuckDB spills in the feature-grid tests
     steps:
       - name: Checkout
         uses: actions/checkout@v4
