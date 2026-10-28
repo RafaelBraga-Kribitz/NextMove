@@ -19,7 +19,7 @@ A next-best-action engine for e-commerce CRM that knows when to do nothing.
 
 ![Policy comparison: expected profit versus doing nothing, by policy, with 95% intervals (simulated data)](reports/demo/evaluation/policy_comparison.png)
 
-**Policy comparison (simulated).** The weekly rules playbook loses €2,909 of expected profit against doing nothing. The engine avoids that loss. The bars show 95% intervals for 1,983 simulated customers over 20 weekly decision rounds, run ID `demo-f8fb25c032`.
+**Policy comparison (simulated).** The weekly rules playbook loses €2,909 of expected profit against doing nothing. The engine avoids that loss. The bars show 95% intervals for 1,983 simulated customers over 20 weekly decision rounds, from run `demo-f8fb25c032`.
 
 ## What it does
 
@@ -58,7 +58,7 @@ Recommendation engines answer "which item?". NextMove ranks a whole action catal
 
 ## Results
 
-All numbers are simulated. Run ID: `demo-f8fb25c032`.
+All numbers are simulated. They come from run `demo-f8fb25c032`.
 
 | Policy | Expected profit vs. doing nothing [95% CI] | Contact rate | Wasted-discount share |
 |---|---|---:|---:|
