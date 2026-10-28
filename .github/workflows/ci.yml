@@ -7,7 +7,9 @@ on:
 jobs:
   checks:
     name: checks
-    runs-on: ubuntu-24.04  # ubuntu-26.04 runners hit a /tmp disk quota when DuckDB spills in the feature-grid tests
+    # Pinned: on Ubuntu 26.04 (ubuntu-latest since late Oct 2026) the DuckDB spill files the
+    # integration tests write under /tmp hit "Disk quota exceeded". 24.04 is where CI last passed.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
